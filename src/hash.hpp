@@ -13,7 +13,7 @@ namespace openae {
 
 // https://www.boost.org/doc/libs/1_87_0/libs/container_hash/doc/html/hash.html#notes_hash_combine
 template <typename T, typename... Rest>
-inline void hash_combine(size_t& seed, const T& v, Rest... rest) {
+inline void hash_combine(std::size_t& seed, const T& v, Rest... rest) {
     std::hash<T> hash_value{};
     seed ^= hash_value(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
     if constexpr (sizeof...(Rest) > 0) {
@@ -46,9 +46,14 @@ struct std::hash<std::span<T>> {
 template <>
 struct std::hash<openae::features::Input> {
     size_t operator()(const openae::features::Input& input) const noexcept {
+        // use user-defined fingerprint/hash if provided
+        if (input.fingerprint.has_value()) {
+            return input.fingerprint.value();
+        }
         size_t seed{};
         openae::hash_combine(seed, input.samplerate);
         openae::hash_combine(seed, input.timedata);
+        openae::hash_combine(seed, input.timedata.size());
         // openae::hash_combine(seed, input.spectrum);
         return seed;
     }

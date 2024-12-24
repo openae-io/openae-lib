@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 #include <complex>
 #include <memory>
 #include <optional>
@@ -13,6 +14,7 @@ struct Input {
     float samplerate;
     std::span<const float> timedata;
     std::span<const std::complex<float>> spectrum;
+    std::optional<std::size_t> fingerprint;
 };
 
 /* ------------------------------------------ Functions ----------------------------------------- */
