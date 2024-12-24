@@ -11,49 +11,54 @@
 
 namespace openae {
 
-template <typename T>
-struct CacheEntry {
-    size_t hash;
-    T value;
+struct CacheKey {
+    std::size_t hash_func;
+    std::size_t hash_args;
+    auto operator<=>(const CacheKey&) const = default;
 };
 
 template <typename T>
 class SingleCacheEntryStorage {
 public:
-    T& insert(size_t hash, const T& result) noexcept(std::is_nothrow_copy_assignable_v<T>) {
-        entry_.emplace(hash, result);
+    T& insert(CacheKey key, const T& result) noexcept(std::is_nothrow_copy_assignable_v<T>) {
+        entry_.emplace(key, result);
         return entry_->value;
     }
 
-    T& insert(size_t hash, T&& result) noexcept(std::is_nothrow_move_assignable_v<T>) {
-        entry_.emplace(hash, std::move(result));
+    T& insert(CacheKey key, T&& result) noexcept(std::is_nothrow_move_assignable_v<T>) {
+        entry_.emplace(key, std::move(result));
         return entry_->value;
     }
 
-    const T* find(size_t hash) const noexcept {
-        if (entry_.has_value() && entry_->hash == hash) {
+    const T* find(CacheKey key) const noexcept {
+        if (entry_.has_value() && entry_->key == key) {
             return &entry_->value;
         }
         return nullptr;
     }
 
 private:
-    std::optional<CacheEntry<T>> entry_;
+    struct Entry {
+        CacheKey key;
+        T value;
+    };
+
+    std::optional<Entry> entry_;
 };
 
 template <template <typename> typename Storage, typename... Ts>
 class BasicCache {
 public:
     template <typename T>
-    auto& insert(size_t hash, T&& result) {
+    auto& insert(CacheKey key, T&& result) {
         using ValueType = std::remove_cvref_t<T>;
-        return storage<ValueType>().insert(hash, std::forward<T>(result));
+        return storage<ValueType>().insert(key, std::forward<T>(result));
     }
 
     template <typename T>
-    const T* find(size_t hash) const noexcept {
+    const T* find(CacheKey key) const noexcept {
         using ValueType = std::remove_cvref_t<T>;
-        return storage<ValueType>().find(hash);
+        return storage<ValueType>().find(key);
     }
 
 private:
@@ -72,7 +77,7 @@ private:
     std::tuple<Storage<Ts>...> caches_;
 };
 
-struct Cache : public BasicCache<SingleCacheEntryStorage, bool, int, size_t, float, double> {};
+struct Cache : public BasicCache<SingleCacheEntryStorage, bool, int, std::size_t, float, double> {};
 
 // TODO: avoid expensive copies with proxy object for cached values.
 template <typename Cache, typename Func, typename... Args>
@@ -85,13 +90,17 @@ auto cached(Cache* cache, Func func, Args&&... args) {
         return invoke();
     }
 
-    size_t hash{};
-    hash_combine(hash, args...);
-    auto* value_ptr = cache->template find<ResultType>(hash);
+    CacheKey key{
+        .hash_func = std::hash<Func>{}(func),
+        .hash_args = {},
+    };
+    hash_combine(key.hash_args, args...);
+
+    auto* value_ptr = cache->template find<ResultType>(key);
     if (value_ptr != nullptr) {
         return *value_ptr;
     }
-    return cache->insert(hash, invoke());
+    return cache->insert(key, invoke());
 }
 
 }  // namespace openae
