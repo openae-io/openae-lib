@@ -12,8 +12,8 @@ static int increment(int x) {
     return x + 1;
 }
 
-TEST_CASE("RingBufferStorage") {
-    openae::RingBufferStorage<int, float, 3> storage;
+TEST_CASE("RingBufferMap") {
+    openae::RingBufferMap<int, float, 3> storage;
     CHECK(storage.size() == 0);
 
     SECTION("insert with same key") {

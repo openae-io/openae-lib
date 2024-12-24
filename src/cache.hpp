@@ -7,6 +7,7 @@
 #include <tuple>
 #include <type_traits>
 #include <utility>  // move, forward
+#include <variant>
 
 #include "hash.hpp"
 
@@ -18,8 +19,8 @@ struct CacheKey {
     auto operator<=>(const CacheKey&) const = default;
 };
 
-template <typename Key, typename T, std::size_t N>
-class RingBufferStorage {
+template <typename Key, typename T, std::size_t N = 16>
+class RingBufferMap {
 public:
     std::size_t size() const noexcept {
         return size_;
@@ -71,24 +72,21 @@ private:
     std::size_t read_index_{0};
 };
 
-template <typename... Ts>
+template <template <typename Key, typename T> typename Map, typename... Ts>
 class BasicCache {
 public:
-    template <typename T>
-    using Storage = RingBufferStorage<CacheKey, T, 16>;
-
     template <typename T>
     auto& insert(CacheKey key, T&& result) {
         using ValueType = std::remove_cvref_t<T>;
         assertIsSupportedType<ValueType>();
-        return storage<ValueType>().insert(key, std::forward<T>(result));
+        return map<ValueType>().insert(key, std::forward<T>(result));
     }
 
     template <typename T>
     const T* find(CacheKey key) const noexcept {
         using ValueType = std::remove_cvref_t<T>;
         assertIsSupportedType<ValueType>();
-        return storage<ValueType>().find(key);
+        return map<ValueType>().find(key);
     }
 
 private:
@@ -102,21 +100,46 @@ private:
     }
 
     template <typename T>
-    constexpr Storage<T>& storage() noexcept {
+    constexpr auto& map() noexcept {
         static_assert(std::is_same_v<T, std::remove_cvref_t<T>>);
-        return std::get<Storage<T>>(caches_);
+        return std::get<Map<CacheKey, T>>(maps_);
     }
 
     template <typename T>
-    constexpr const Storage<T>& storage() const noexcept {
+    constexpr const auto& map() const noexcept {
         static_assert(std::is_same_v<T, std::remove_cvref_t<T>>);
-        return std::get<Storage<T>>(caches_);
+        return std::get<Map<CacheKey, T>>(maps_);
     }
 
-    std::tuple<Storage<Ts>...> caches_;
+    std::tuple<Map<CacheKey, Ts>...> maps_;
 };
 
-struct Cache : public BasicCache<bool, int, std::size_t, float, double> {};
+struct Cache {
+    template <typename T>
+    auto& insert(CacheKey key, T&& result) {
+        return std::visit(
+            [&](auto& impl) -> decltype(auto) {
+                return impl.template insert<T>(key, std::forward<T>(result));
+            },
+            cache
+        );
+    }
+
+    template <typename T>
+    const T* find(CacheKey key) const noexcept {
+        return std::visit(
+            [&](const auto& impl) -> const T* {
+                return impl.template find<T>(key);
+            },
+            cache
+        );
+    }
+
+    template <template <typename, typename> typename Storage>
+    using CacheVariant = BasicCache<Storage, bool, int, std::size_t, float, double>;
+
+    std::variant<CacheVariant<RingBufferMap> /* to be extended... */> cache;
+};
 
 // TODO: avoid expensive copies with proxy object for cached values.
 template <typename Cache, typename Func, typename... Args>
