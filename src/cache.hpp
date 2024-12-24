@@ -18,25 +18,6 @@ struct CacheKey {
     auto operator<=>(const CacheKey&) const = default;
 };
 
-template <typename Key, typename T>
-class SingleEntryStorage {
-public:
-    T& insert(Key key, T result) {
-        entry_.emplace(key, std::move(result));
-        return entry_->second;
-    }
-
-    const T* find(Key key) const noexcept {
-        if (entry_.has_value() && entry_->first == key) {
-            return &entry_->second;
-        }
-        return nullptr;
-    }
-
-private:
-    std::optional<std::pair<Key, T>> entry_;
-};
-
 template <typename Key, typename T, std::size_t N>
 class RingBufferStorage {
 public:
