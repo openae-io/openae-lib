@@ -1,0 +1,26 @@
+feature = "rms"
+
+[[tests]]
+name = "Empty input data"
+input.timedata = []
+output = 0.0
+
+[[tests]]
+name = "Zeros"
+input.timedata = [0, 0, 0]
+output = 0.0
+
+[[tests]]
+name = "Ones"
+input.timedata = [1, 1]
+output = 1.0
+
+[[tests]]
+name = "Mixed signs"
+input.timedata = [2, -2]
+output = 2.0
+
+[[tests]]
+name = "Slope"
+input.timedata = [-3, -2, -1, 0, 1, 2, 3]
+output = 2.0

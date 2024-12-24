@@ -1,0 +1,10 @@
+#pragma once
+
+#include <string_view>
+
+namespace openae::test {
+
+inline constexpr std::string_view test_dir = "@CMAKE_CURRENT_SOURCE_DIR@";
+
+} // namespace openae::test
+
