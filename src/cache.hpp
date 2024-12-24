@@ -90,9 +90,12 @@ private:
     std::size_t read_index_{0};
 };
 
-template <template <typename> typename Storage, typename... Ts>
+template <typename... Ts>
 class BasicCache {
 public:
+    template <typename T>
+    using Storage = RingBufferStorage<CacheKey, T, 16>;
+
     template <typename T>
     auto& insert(CacheKey key, T&& result) {
         using ValueType = std::remove_cvref_t<T>;
@@ -132,10 +135,7 @@ private:
     std::tuple<Storage<Ts>...> caches_;
 };
 
-template <typename T>
-using Storage = RingBufferStorage<CacheKey, T, 16>;
-
-struct Cache : public BasicCache<Storage, bool, int, std::size_t, float, double> {};
+struct Cache : public BasicCache<bool, int, std::size_t, float, double> {};
 
 // TODO: avoid expensive copies with proxy object for cached values.
 template <typename Cache, typename Func, typename... Args>
