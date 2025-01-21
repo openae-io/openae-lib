@@ -1,11 +1,15 @@
 #include <filesystem>
+#include <ostream>
 #include <stdexcept>
 #include <string>
 #include <string_view>
+#include <utility>
+#include <vector>
 
 #include <catch2/catch_test_macros.hpp>
 #include <toml++/toml.hpp>
 
+#include "openae/common.hpp"
 #include "openae/features.hpp"
 
 #include "test_config.hpp"
@@ -16,20 +20,34 @@ struct OwningInput {
     std::vector<std::complex<float>> spectrum;
 
     operator openae::features::Input() const {
-        return {
-            .samplerate = samplerate,
-            .timedata = timedata,
-            .spectrum = spectrum,
-        };
+        return {.samplerate = samplerate, .timedata = timedata, .spectrum = spectrum};
     }
 };
 
-static OwningInput timedata_input(std::vector<float> timedata, float samplerate = 0.0f) {
-    return OwningInput{
-        .samplerate = samplerate,
-        .timedata = std::move(timedata),
-        .spectrum = {}
-    };
+static OwningInput make_input_timedata(std::vector<float> timedata, float samplerate = 0.0f) {
+    return {.samplerate = samplerate, .timedata = std::move(timedata), .spectrum = {}};
+}
+
+template <typename T>
+static std::ostream& operator<<(std::ostream& os, const std::vector<T>& vec) {
+    os << "[";
+    for (size_t i = 0; i < vec.size(); ++i) {
+        os << vec.at(i);
+        if (i + 1 < vec.size()) {
+            os << ", ";
+        }
+    }
+    os << "]";
+    return os;
+}
+
+static std::ostream& operator<<(std::ostream& os, const OwningInput& input) {
+    os << "{";
+    os << "samplerate: " << input.samplerate << ", ";
+    os << "timedata: " << input.timedata << ", ";
+    os << "spectrum: " << input.spectrum;
+    os << "}";
+    return os;
 }
 
 struct TestCase {
@@ -38,7 +56,7 @@ struct TestCase {
     double output;
 };
 
-struct FeatureTests {
+struct TestFile {
     std::string feature;
     std::vector<TestCase> tests;
 };
@@ -47,27 +65,24 @@ class ParseError : public std::runtime_error {
     using runtime_error::runtime_error;
 };
 
-static std::vector<float> parse_input_timedata(const toml::node& node) {
-    std::vector<float> vec;
+template <typename T>
+static std::vector<T> parse_array(const toml::node& node) {
     if (const auto* arr = node.as_array()) {
-        for (const auto& value : *arr) {
-            if (value.is_number()) {
-                vec.push_back(value.value_or<float>(0.0f));
-            } else {
-                ParseError("input.timedata invalid (array with ints/floats required)");
-            }
-        }
+        std::vector<T> vec(arr->size());
+        std::transform(arr->begin(), arr->end(), vec.begin(), [](const toml::node& v) {
+            return v.value<T>().value();
+        });
         return vec;
     }
-    throw ParseError("input.timedata is not an array");
+    throw ParseError("node is not an array");
 }
 
 static OwningInput parse_input(const toml::node& node) {
     if (const auto* tbl = node.as_table()) {
         return OwningInput{
-            .samplerate = (*tbl)["samplerate"].value_or(0.0f),
-            .timedata = parse_input_timedata(tbl->at("timedata")),
-
+            .samplerate = tbl->at_path("samplerate").value_or(0.0f),
+            .timedata = parse_array<float>(tbl->at("timedata")),
+            .spectrum = {},  // TODO
         };
     }
     throw ParseError("input is not a table");
@@ -94,25 +109,21 @@ static std::vector<TestCase> parse_test_cases(const toml::node& node) {
     return tests;
 }
 
-static FeatureTests parse_feature_tests(std::string_view filename) {
+static TestFile parse_test_file(std::string_view filename) {
     const auto path = std::filesystem::path{openae::test::test_dir} / filename;
     const toml::table tbl = toml::parse_file(path.c_str());
-    return FeatureTests{
+    return TestFile{
         .feature = tbl.at("feature").value<std::string>().value(),
         .tests = parse_test_cases(tbl.at("tests")),
     };
 }
 
 TEST_CASE("Features") {
-    const auto test_file = parse_feature_tests("test_features_rms.toml");
     openae::Env env{};
 
-    CAPTURE(test_file.feature);
-    for (const auto& test : test_file.tests) {
+    for (const auto& test : parse_test_file("test_features_rms.toml").tests) {
         DYNAMIC_SECTION(test.name) {
-            CAPTURE(test.input.samplerate);
-            CAPTURE(test.input.timedata);
-            CAPTURE(test.input.spectrum);
+            CAPTURE(test.input);
             CHECK(openae::features::rms(env, test.input) == test.output);
         }
     }
@@ -123,7 +134,7 @@ TEST_CASE("Algorithm") {
 
     SECTION("No parameter") {
         auto algorithm = openae::features::make_algorithm("rms");
-        auto input = timedata_input({1, -1}, 2.0f);
+        auto input = make_input_timedata({1, -1}, 2.0f);
         CHECK(algorithm->process(env, input) == 1.0f);
     }
 
@@ -133,7 +144,6 @@ TEST_CASE("Algorithm") {
         CHECK(algorithm->get_parameter("rolloff").value() == 0.0);
         CHECK(algorithm->set_parameter("rolloff", 0.9f));
         CHECK(algorithm->get_parameter("rolloff").value() == 0.9f);
-
 
         CHECK_FALSE(algorithm->get_parameter("invalid").has_value());
         CHECK_FALSE(algorithm->set_parameter("invalid", 11.11f));
