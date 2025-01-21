@@ -69,28 +69,20 @@ float rms([[maybe_unused]] Env& env, Input input) {
     return std::sqrt(transform_avg(input.timedata, [](auto v) { return v * v; }));
 }
 
-inline static float rms_cached(Env& env, Input input) {
-    return cached(env.cache, rms, env, input);
-}
-
 float crest_factor([[maybe_unused]] Env& env, Input input) {
-    return peak_amplitude(env, input) / rms_cached(env, input);
+    return peak_amplitude(env, input) / rms(env, input);
 }
 
 static float mean_absolute(Timedata y) {
     return transform_avg(y, [](auto v) { return std::abs(v); });
 }
 
-inline static float mean_absolute_cached(Env& env, Input input) {
-    return cached(env.cache, mean_absolute, input.timedata);
-}
-
 float impulse_factor([[maybe_unused]] Env& env, Input input) {
-    return peak_amplitude(env, input) / mean_absolute_cached(env, input);
+    return peak_amplitude(env, input) / mean_absolute(input.timedata);
 }
 
 float k_factor([[maybe_unused]] Env& env, Input input) {
-    return peak_amplitude(env, input) * rms_cached(env, input);
+    return peak_amplitude(env, input) * rms(env, input);
 }
 
 float margin_factor([[maybe_unused]] Env& env, Input input) {
@@ -101,7 +93,7 @@ float margin_factor([[maybe_unused]] Env& env, Input input) {
 }
 
 float shape_factor([[maybe_unused]] Env& env, Input input) {
-    return rms_cached(env, input) / mean_absolute_cached(env, input);
+    return rms(env, input) / mean_absolute(input.timedata);
 }
 
 static size_t zero_crossings(Timedata y) {
