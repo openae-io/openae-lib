@@ -20,6 +20,7 @@ struct Input {
 /* ------------------------------------------ Functions ----------------------------------------- */
 
 float peak_amplitude(Env& env, Input input);
+float energy(Env& env, Input input);
 float rms(Env& env, Input input);
 float crest_factor(Env& env, Input input);
 float impulse_factor(Env& env, Input input);

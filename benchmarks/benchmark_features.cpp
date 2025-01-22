@@ -143,8 +143,9 @@ static void run_algorithm(benchmark::State& state, const char* identifier) {
 
 constexpr size_t vec_size = 65536;
 
-BENCHMARK_CAPTURE(run_default, rms, openae::features::rms)->Arg(vec_size);
 BENCHMARK_CAPTURE(run_default, peak_amplitude, openae::features::peak_amplitude)->Arg(vec_size);
+BENCHMARK_CAPTURE(run_default, energy, openae::features::energy)->Arg(vec_size);
+BENCHMARK_CAPTURE(run_default, rms, openae::features::rms)->Arg(vec_size);
 BENCHMARK_CAPTURE(run_default, crest_factor, openae::features::crest_factor)->Arg(vec_size);
 BENCHMARK_CAPTURE(run_default, impulse_factor, openae::features::impulse_factor)->Arg(vec_size);
 BENCHMARK_CAPTURE(run_default, k_factor, openae::features::k_factor)->Arg(vec_size);
@@ -161,7 +162,6 @@ BENCHMARK_CAPTURE(run_default, spectral_rolloff, openae::features::spectral_roll
 BENCHMARK_CAPTURE(run_monotonic, spectral_rolloff, openae::features::spectral_rolloff, 0.9f)->Arg(vec_size);
 BENCHMARK_CAPTURE(run_pool, spectral_rolloff, openae::features::spectral_rolloff, 0.9f)->Arg(vec_size);
 
-BENCHMARK_CAPTURE(run_algorithm, rms, "rms")->Arg(vec_size);
 BENCHMARK_CAPTURE(run_algorithm, peak_amplitude, "peak-amplitude")->Arg(vec_size);
 
 BENCHMARK_MAIN();

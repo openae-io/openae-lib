@@ -8,8 +8,8 @@
 #include "openae/common.hpp"
 
 #include "cache.hpp"
-#include "hash.hpp"
 #include "features_meta.hpp"
+#include "hash.hpp"
 
 namespace openae::features {
 
@@ -36,17 +36,25 @@ static constexpr T accumulate(std::span<const T> y, T init, Args... args) {
 }
 
 template <typename T>
+static constexpr T sum(std::span<const T> y) {
+    return std::accumulate(y.begin(), y.end(), T{0});
+}
+
+template <typename T>
 static constexpr T avg(std::span<const T> y) {
-    return std::accumulate(y.begin(), y.end(), T{0}) / static_cast<T>(y.size());
+    return sum(y) / static_cast<T>(y.size());
+}
+
+template <typename T, typename UnaryOp>
+static constexpr T transform_sum(std::span<const T> y, UnaryOp unary_op) {
+    return std::accumulate(y.begin(), y.end(), T{}, [unary_op](auto sum, auto v) {
+        return sum + unary_op(v);
+    });
 }
 
 template <typename T, typename UnaryOp>
 static constexpr T transform_avg(std::span<const T> y, UnaryOp unary_op) {
-    if (y.empty()) {
-        return T{0};
-    };
-    const auto binary_op = [unary_op](auto sum, auto v) { return sum + unary_op(v); };
-    return std::accumulate(y.begin(), y.end(), T{0}, binary_op) / static_cast<T>(y.size());
+    return transform_sum(y, unary_op) / static_cast<T>(y.size());
 }
 
 static constexpr float bin_to_hz(Input input, size_t index) noexcept {
@@ -63,6 +71,10 @@ float peak_amplitude([[maybe_unused]] Env& env, Input input) {
         std::abs(min != input.timedata.end() ? *min : 0.0f),
         std::abs(max != input.timedata.end() ? *max : 0.0f)
     );
+}
+
+float energy([[maybe_unused]] Env& env, Input input) {
+    return transform_sum(input.timedata, [](auto v) { return v * v; });
 }
 
 float rms([[maybe_unused]] Env& env, Input input) {
