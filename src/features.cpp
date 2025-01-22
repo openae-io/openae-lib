@@ -1,9 +1,11 @@
 #include "openae/features.hpp"
 
 #include <algorithm>
-#include <cmath>
+#include <cassert>
+#include <cstdint>
 #include <numeric>  // reduce
 #include <ranges>
+#include <type_traits>
 
 #include "openae/common.hpp"
 
@@ -30,75 +32,86 @@ static constexpr T pow(T base) noexcept {
     }
 }
 
-template <typename T>
-static constexpr T sum(std::span<const T> y) {
-    return std::reduce(y.begin(), y.end(), T{0});
+template <std::ranges::input_range Range>
+static constexpr auto sum(const Range& range) {
+    return std::reduce(std::ranges::begin(range), std::ranges::end(range));
 }
 
-template <typename T>
-static constexpr T mean(std::span<const T> y) {
-    return sum(y) / static_cast<T>(y.size());
+template <std::ranges::input_range Range>
+static constexpr auto mean(const Range& range) {
+    using T = std::ranges::range_value_t<Range>;
+    if (std::ranges::empty(range)) {
+        return T{};
+    }
+    return sum(range) / std::ranges::size(range);
 }
 
-template <typename T, typename UnaryOp>
-static constexpr T transform_sum(std::span<const T> y, UnaryOp transform) {
-    return std::transform_reduce(y.begin(), y.end(), T{0}, std::plus<T>{}, transform);
+static constexpr float bin_to_hz(float samplerate, size_t bins, auto bin) noexcept {
+    assert(bin < bins);
+    if (bins <= 1) {
+        return 0.0f;
+    }
+    return 0.5f * samplerate * static_cast<float>(bin) / static_cast<float>(bins - 1);
 }
 
-template <typename T, typename UnaryOp>
-static constexpr T transform_mean(std::span<const T> y, UnaryOp transform) {
-    return transform_sum(y, transform) / static_cast<T>(y.size());
+static constexpr size_t hz_to_bin(float samplerate, size_t bins, float frequency) noexcept {
+    assert(frequency >= 0.0f);
+    assert(frequency <= 0.5f * samplerate);
+    const auto bin = static_cast<float>(bins - 1) * frequency / (0.5f * samplerate);
+    return static_cast<size_t>(bin + 0.5f);
 }
 
-static constexpr float bin_to_hz(Input input, size_t index) noexcept {
-    const auto nyquist = 0.5f * input.samplerate;
-    const auto nfft = input.spectrum.size();
-    return nyquist * static_cast<float>(index) / static_cast<float>(nfft - 1);
+namespace views {
+
+template <std::ranges::input_range Range>
+static constexpr auto square(const Range& range) {
+    return std::views::transform(range, [](auto v) { return v * v; });
 }
+
+template <std::ranges::input_range Range>
+static constexpr auto abs(const Range& range) {
+    return std::views::transform(range, [](auto v) { return std::abs(v); });
+}
+
+template <std::ranges::input_range Range>
+static constexpr auto sqrt(const Range& range) {
+    return std::views::transform(range, [](auto v) { return std::sqrt(v); });
+}
+
+}  // namespace views
 
 /* -------------------------------------------- Basic ------------------------------------------- */
 
 float peak_amplitude([[maybe_unused]] Env& env, Input input) {
-    const auto [min, max] = std::minmax_element(input.timedata.begin(), input.timedata.end());
-    return std::max(
-        std::abs(min != input.timedata.end() ? *min : 0.0f),
-        std::abs(max != input.timedata.end() ? *max : 0.0f)
-    );
+    if (input.timedata.empty()) {
+        return 0.0f;
+    }
+    const auto [min, max] = std::ranges::minmax(input.timedata);
+    return std::max(std::abs(min), std::abs(max));
 }
 
 float energy([[maybe_unused]] Env& env, Input input) {
-    return transform_sum(input.timedata, [](auto v) { return v * v; }) / input.samplerate;
+    return sum(views::square(input.timedata)) / input.samplerate;
 }
 
 float rms([[maybe_unused]] Env& env, Input input) {
-    return std::sqrt(transform_mean(input.timedata, [](auto v) { return v * v; }));
+    return std::sqrt(mean(views::square(input.timedata)));
 }
 
 float crest_factor([[maybe_unused]] Env& env, Input input) {
     return peak_amplitude(env, input) / rms(env, input);
 }
 
-static float mean_absolute(Timedata y) {
-    return transform_mean(y, [](auto v) { return std::abs(v); });
-}
-
 float impulse_factor([[maybe_unused]] Env& env, Input input) {
-    return peak_amplitude(env, input) / mean_absolute(input.timedata);
+    return peak_amplitude(env, input) / mean(views::abs(input.timedata));
 }
 
-float k_factor([[maybe_unused]] Env& env, Input input) {
-    return peak_amplitude(env, input) * rms(env, input);
-}
-
-float margin_factor([[maybe_unused]] Env& env, Input input) {
-    const auto mean_sqrt_abs = transform_mean(input.timedata, [](auto v) {
-        return std::sqrt(std::abs(v));
-    });
-    return peak_amplitude(env, input) / (mean_sqrt_abs * mean_sqrt_abs);
+float clearance_factor([[maybe_unused]] Env& env, Input input) {
+    return peak_amplitude(env, input) / pow<2>(mean(views::sqrt(views::abs(input.timedata))));
 }
 
 float shape_factor([[maybe_unused]] Env& env, Input input) {
-    return rms(env, input) / mean_absolute(input.timedata);
+    return rms(env, input) / mean(views::abs(input.timedata));
 }
 
 static size_t zero_crossings(Timedata y) {
@@ -120,8 +133,8 @@ float zero_crossing_rate([[maybe_unused]] Env& env, Input input) {
 /* ----------------------------------------- Statistics ----------------------------------------- */
 
 template <size_t N>
-static float central_moment(Timedata y, float mean) {
-    return transform_mean(y, [mean](auto v) { return pow<N>(v - mean); });
+static float central_moment(Timedata y, float y_mean) {
+    return mean(std::views::transform(y, [y_mean](auto v) { return pow<N>(v - y_mean); }));
 }
 
 template <size_t N>
@@ -130,8 +143,8 @@ static float standardized_moment(Timedata y) {
         return 0.0f;
     }
     const auto y_mean = mean(y);
-    const auto variance = central_moment<2>(y, y_mean);
-    return central_moment<N>(y, y_mean) / pow<N>(std::sqrt(variance));
+    const auto y_variance = central_moment<2>(y, y_mean);
+    return central_moment<N>(y, y_mean) / pow<N>(std::sqrt(y_variance));
 }
 
 float skewness([[maybe_unused]] Env& env, Input input) {
@@ -157,7 +170,7 @@ static std::pmr::vector<float> power_spectrum_allocate(Env& env, Input input) {
 }
 
 static auto power_spectrum_view(Spectrum spectrum) {
-    return std::ranges::views::transform(spectrum, [](auto c) { return std::norm(c); });
+    return std::views::transform(spectrum, [](auto c) { return std::norm(c); });
 }
 
 float spectral_centroid(Env& env, Input input) {
@@ -169,7 +182,7 @@ float spectral_centroid(Env& env, Input input) {
         power_sum += power_spectrum[bin];
         power_sum_weighted += bin * power_spectrum[bin];
     }
-    return 0.5f * input.samplerate / (bins - 1) * (power_sum / power_sum_weighted);
+    return bin_to_hz(input.samplerate, bins, power_sum_weighted / power_sum);
 }
 
 float spectral_centroid_lazy([[maybe_unused]] Env& env, Input input) {
@@ -181,7 +194,7 @@ float spectral_centroid_lazy([[maybe_unused]] Env& env, Input input) {
         power_sum += power_spectrum[bin];
         power_sum_weighted += bin * power_spectrum[bin];
     }
-    return 0.5f * input.samplerate / (bins - 1) * (power_sum / power_sum_weighted);
+    return bin_to_hz(input.samplerate, bins, power_sum_weighted / power_sum);
 }
 
 float spectral_centroid_inplace([[maybe_unused]] Env& env, Input input) {
@@ -193,7 +206,7 @@ float spectral_centroid_inplace([[maybe_unused]] Env& env, Input input) {
         power_sum += power;
         power_sum_weighted += bin * power;
     }
-    return 0.5f * input.samplerate / (bins - 1) * (power_sum / power_sum_weighted);
+    return bin_to_hz(input.samplerate, bins, power_sum_weighted / power_sum);
 }
 
 float spectral_rolloff([[maybe_unused]] Env& env, Input input, float rolloff) {
@@ -208,8 +221,8 @@ float spectral_rolloff([[maybe_unused]] Env& env, Input input, float rolloff) {
     const auto threshold = total * std::clamp(rolloff, 0.0f, 1.0f);
 
     const auto it = std::upper_bound(acc.begin(), acc.end(), threshold);
-    const auto index = std::distance(acc.begin(), it);
-    return bin_to_hz(input, index);
+    const auto bin = std::distance(acc.begin(), it);
+    return bin_to_hz(input.samplerate, input.spectrum.size(), bin);
 }
 
 }  // namespace openae::features

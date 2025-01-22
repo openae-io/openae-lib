@@ -24,8 +24,7 @@ float energy(Env& env, Input input);
 float rms(Env& env, Input input);
 float crest_factor(Env& env, Input input);
 float impulse_factor(Env& env, Input input);
-float k_factor(Env& env, Input input);
-float margin_factor(Env& env, Input input);
+float clearance_factor(Env& env, Input input);
 float shape_factor(Env& env, Input input);
 
 float skewness(Env& env, Input input);
