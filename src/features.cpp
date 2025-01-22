@@ -2,7 +2,7 @@
 
 #include <algorithm>
 #include <cmath>
-#include <numeric>  // accumulate
+#include <numeric>  // reduce
 #include <ranges>
 
 #include "openae/common.hpp"
@@ -30,31 +30,24 @@ static constexpr T pow(T base) noexcept {
     }
 }
 
-template <typename T, typename... Args>
-static constexpr T accumulate(std::span<const T> y, T init, Args... args) {
-    return std::accumulate(y.begin(), y.end(), init, args...);
-}
-
 template <typename T>
 static constexpr T sum(std::span<const T> y) {
-    return std::accumulate(y.begin(), y.end(), T{0});
+    return std::reduce(y.begin(), y.end(), T{0});
 }
 
 template <typename T>
-static constexpr T avg(std::span<const T> y) {
+static constexpr T mean(std::span<const T> y) {
     return sum(y) / static_cast<T>(y.size());
 }
 
 template <typename T, typename UnaryOp>
-static constexpr T transform_sum(std::span<const T> y, UnaryOp unary_op) {
-    return std::accumulate(y.begin(), y.end(), T{}, [unary_op](auto sum, auto v) {
-        return sum + unary_op(v);
-    });
+static constexpr T transform_sum(std::span<const T> y, UnaryOp transform) {
+    return std::transform_reduce(y.begin(), y.end(), T{0}, std::plus<T>{}, transform);
 }
 
 template <typename T, typename UnaryOp>
-static constexpr T transform_avg(std::span<const T> y, UnaryOp unary_op) {
-    return transform_sum(y, unary_op) / static_cast<T>(y.size());
+static constexpr T transform_mean(std::span<const T> y, UnaryOp transform) {
+    return transform_sum(y, transform) / static_cast<T>(y.size());
 }
 
 static constexpr float bin_to_hz(Input input, size_t index) noexcept {
@@ -74,11 +67,11 @@ float peak_amplitude([[maybe_unused]] Env& env, Input input) {
 }
 
 float energy([[maybe_unused]] Env& env, Input input) {
-    return transform_sum(input.timedata, [](auto v) { return v * v; });
+    return transform_sum(input.timedata, [](auto v) { return v * v; }) / input.samplerate;
 }
 
 float rms([[maybe_unused]] Env& env, Input input) {
-    return std::sqrt(transform_avg(input.timedata, [](auto v) { return v * v; }));
+    return std::sqrt(transform_mean(input.timedata, [](auto v) { return v * v; }));
 }
 
 float crest_factor([[maybe_unused]] Env& env, Input input) {
@@ -86,7 +79,7 @@ float crest_factor([[maybe_unused]] Env& env, Input input) {
 }
 
 static float mean_absolute(Timedata y) {
-    return transform_avg(y, [](auto v) { return std::abs(v); });
+    return transform_mean(y, [](auto v) { return std::abs(v); });
 }
 
 float impulse_factor([[maybe_unused]] Env& env, Input input) {
@@ -98,7 +91,7 @@ float k_factor([[maybe_unused]] Env& env, Input input) {
 }
 
 float margin_factor([[maybe_unused]] Env& env, Input input) {
-    const auto mean_sqrt_abs = transform_avg(input.timedata, [](auto v) {
+    const auto mean_sqrt_abs = transform_mean(input.timedata, [](auto v) {
         return std::sqrt(std::abs(v));
     });
     return peak_amplitude(env, input) / (mean_sqrt_abs * mean_sqrt_abs);
@@ -128,7 +121,7 @@ float zero_crossing_rate([[maybe_unused]] Env& env, Input input) {
 
 template <size_t N>
 static float central_moment(Timedata y, float mean) {
-    return transform_avg(y, [mean](auto v) { return pow<N>(v - mean); });
+    return transform_mean(y, [mean](auto v) { return pow<N>(v - mean); });
 }
 
 template <size_t N>
@@ -136,9 +129,9 @@ static float standardized_moment(Timedata y) {
     if (y.size() < N) {
         return 0.0f;
     }
-    const auto mean = avg(y);
-    const auto variance = central_moment<2>(y, mean);
-    return central_moment<N>(y, mean) / pow<N>(std::sqrt(variance));
+    const auto y_mean = mean(y);
+    const auto variance = central_moment<2>(y, y_mean);
+    return central_moment<N>(y, y_mean) / pow<N>(std::sqrt(variance));
 }
 
 float skewness([[maybe_unused]] Env& env, Input input) {
