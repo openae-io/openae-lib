@@ -3,7 +3,7 @@ feature = "skewness"
 [[tests]]
 name = "empty input"
 input.timedata = []
-result = 0
+result = 0.0
 
 [[tests]]
 name = "zeros"
