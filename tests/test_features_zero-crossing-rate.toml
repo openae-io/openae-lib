@@ -1,0 +1,30 @@
+feature = "zero-crossing-rate"
+
+[[tests]]
+name = "empty input"
+input.timedata = []
+result = nan
+
+[[tests]]
+name = "zeros"
+input.samplerate = 1
+input.timedata = [0, 0, 0]
+result = 0.0
+
+[[tests]]
+name = "ones"
+input.samplerate = 1
+input.timedata = [1, 1]
+result = 0.0
+
+[[tests]]
+name = "mixed signs"
+input.samplerate = 10
+input.timedata = [1, -1, 1, -1]
+result = 7.5 # 10/4 * 3
+
+[[tests]]
+name = "mixed signs with zeros"
+input.samplerate = 20
+input.timedata = [1, -1, 0, -1]
+result = 15 # 20/4 * 3
