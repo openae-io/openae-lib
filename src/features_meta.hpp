@@ -27,6 +27,7 @@ consteval auto meta() {
     return std::tuple{
         Feature{&rms, "rms", {}},
         Feature{&peak_amplitude, "peak-amplitude", {}},
+        Feature{&partial_power, "partial-power", {Parameter{"fmin"}, Parameter{"fmax"}}},
         Feature{&spectral_rolloff, "spectral-rolloff", {Parameter{"rolloff"}}},
     };
 }

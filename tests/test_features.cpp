@@ -2,17 +2,18 @@
 #include <ostream>
 #include <stdexcept>
 #include <string>
-#include <string_view>
 #include <utility>
 #include <vector>
 
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_floating_point.hpp>
 #include <toml++/toml.hpp>
 
 #include "openae/common.hpp"
 #include "openae/features.hpp"
 
 #include "test_config.hpp"
+#include "tostring.hpp"
 
 struct OwningInput {
     float samplerate;
@@ -28,32 +29,13 @@ static OwningInput make_input_timedata(std::vector<float> timedata, float sample
     return {.samplerate = samplerate, .timedata = std::move(timedata), .spectrum = {}};
 }
 
-template <typename T>
-static std::ostream& operator<<(std::ostream& os, const std::vector<T>& vec) {
-    os << "[";
-    for (size_t i = 0; i < vec.size(); ++i) {
-        os << vec.at(i);
-        if (i + 1 < vec.size()) {
-            os << ", ";
-        }
-    }
-    os << "]";
-    return os;
-}
-
-static std::ostream& operator<<(std::ostream& os, const OwningInput& input) {
-    os << "{";
-    os << "samplerate: " << input.samplerate << ", ";
-    os << "timedata: " << input.timedata << ", ";
-    os << "spectrum: " << input.spectrum;
-    os << "}";
-    return os;
-}
+using ParameterMap = std::map<std::string, double>;
 
 struct TestCase {
     std::string name;
     OwningInput input;
-    double output;
+    ParameterMap parameters;
+    double result;
 };
 
 struct TestFile {
@@ -65,12 +47,12 @@ class ParseError : public std::runtime_error {
     using runtime_error::runtime_error;
 };
 
-template <typename T>
+template <typename T, typename TomlType = T>
 static std::vector<T> parse_array(const toml::node& node) {
     if (const auto* arr = node.as_array()) {
         std::vector<T> vec(arr->size());
         std::transform(arr->begin(), arr->end(), vec.begin(), [](const toml::node& v) {
-            return v.value<T>().value();
+            return v.value<TomlType>().value();
         });
         return vec;
     }
@@ -81,11 +63,26 @@ static OwningInput parse_input(const toml::node& node) {
     if (const auto* tbl = node.as_table()) {
         return OwningInput{
             .samplerate = tbl->at_path("samplerate").value_or(0.0f),
-            .timedata = parse_array<float>(tbl->at("timedata")),
-            .spectrum = {},  // TODO
+            .timedata = tbl->contains("timedata")
+                ? parse_array<float>(tbl->at("timedata"))
+                : std::vector<float>{},
+            .spectrum = tbl->contains("spectrum")
+                ? parse_array<std::complex<float>, float>(tbl->at("spectrum"))
+                : std::vector<std::complex<float>>{},
         };
     }
     throw ParseError("input is not a table");
+}
+
+static ParameterMap parse_parameters(const toml::node& node) {
+    if (const auto* tbl = node.as_table()) {
+        ParameterMap params;
+        for (const auto& [key, value] : *tbl) {
+            params.emplace(key.str(), value.value<double>().value());
+        }
+        return params;
+    }
+    throw ParseError("params is not a table");
 }
 
 static TestCase parse_test_case(const toml::node& node) {
@@ -93,7 +90,10 @@ static TestCase parse_test_case(const toml::node& node) {
         return TestCase{
             .name = tbl->at("name").value<std::string>().value(),
             .input = parse_input(tbl->at("input")),
-            .output = tbl->at("output").value<double>().value(),
+            .parameters = tbl->contains("params")
+                ? parse_parameters(tbl->at("params"))
+                : ParameterMap{},
+            .result = tbl->at("result").value<double>().value(),
         };
     }
     throw ParseError("test is not an object");
@@ -109,8 +109,7 @@ static std::vector<TestCase> parse_test_cases(const toml::node& node) {
     return tests;
 }
 
-static TestFile parse_test_file(std::string_view filename) {
-    const auto path = std::filesystem::path{openae::test::test_dir} / filename;
+static TestFile parse_test_file(std::filesystem::path path) {
     const toml::table tbl = toml::parse_file(path.c_str());
     return TestFile{
         .feature = tbl.at("feature").value<std::string>().value(),
@@ -118,13 +117,63 @@ static TestFile parse_test_file(std::string_view filename) {
     };
 }
 
-TEST_CASE("Features") {
-    openae::Env env{};
+static std::vector<std::filesystem::path> find_test_files() {
+    std::vector<std::filesystem::path> files;
+    for (const auto& entry : std::filesystem::directory_iterator(openae::test::test_dir)) {
+        if (entry.is_regular_file() && entry.path().extension() == ".toml") {
+            files.push_back(entry.path());
+        }
+    }
+    return files;
+}
 
-    for (const auto& test : parse_test_file("test_features_rms.toml").tests) {
-        DYNAMIC_SECTION(test.name) {
-            CAPTURE(test.input);
-            CHECK(openae::features::rms(env, test.input) == test.output);
+template <typename Intermediate, typename T>
+static T cast_error(T value) {
+    return std::abs(value - static_cast<T>(static_cast<Intermediate>(value)));
+}
+
+TEST_CASE("Features") {
+    for (const auto& path : find_test_files()) {
+        CAPTURE(path.filename());
+        const auto test_file = parse_test_file(path);
+
+        for (const auto& test : test_file.tests) {
+            DYNAMIC_SECTION(test.name) {
+                CAPTURE(test.name);
+                CAPTURE(test.input.samplerate);
+                CAPTURE(test.input.timedata);
+                CAPTURE(test.input.spectrum);
+                CAPTURE(test.parameters);
+
+                auto algorithm = openae::features::make_algorithm(test_file.feature.c_str());
+                REQUIRE(algorithm != nullptr);
+
+                for (const auto& [name, value] : test.parameters) {
+                    CAPTURE(name, value);
+                    REQUIRE(algorithm->set_parameter(name.c_str(), value));
+                    REQUIRE_THAT(
+                        algorithm->get_parameter(name.c_str()).value(),
+                        Catch::Matchers::WithinAbs(value, cast_error<float>(value))
+                    );
+                }
+
+                openae::Env env{};
+                const auto result = algorithm->process(env, test.input);
+                CAPTURE(test.result, result);
+
+                if (std::isnan(test.result)) {
+                    REQUIRE(std::isnan(result));
+                } else if (std::isinf(test.result)) {
+                    REQUIRE(std::isinf(result));
+                } else {
+                    REQUIRE_THAT(
+                        result,
+                        Catch::Matchers::WithinAbs(
+                            test.result, cast_error<float>(test.result)
+                        )
+                    );
+                }
+            }
         }
     }
 }

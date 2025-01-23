@@ -13,16 +13,13 @@
 #include "features_meta.hpp"
 #include "hash.hpp"
 
-namespace openae::features {
-
-using Timedata = std::span<const float>;
-using Spectrum = std::span<const std::complex<float>>;
+namespace {
 
 /// Ìntegral-valued powers
 /// @see https://en.wikipedia.org/wiki/Exponentiation_by_squaring
 /// @see https://github.com/kthohr/gcem/blob/master/include%2Fgcem_incl%2Fpow_integral.hpp
 template <size_t Exp, typename T>
-static constexpr T pow(T base) noexcept {
+constexpr T pow(T base) noexcept {
     if constexpr (Exp == 0) {
         return T{1};
     } else if constexpr (Exp % 2 == 0) {
@@ -33,12 +30,12 @@ static constexpr T pow(T base) noexcept {
 }
 
 template <std::ranges::input_range Range>
-static constexpr auto sum(const Range& range) {
+constexpr auto sum(const Range& range) {
     return std::reduce(std::ranges::begin(range), std::ranges::end(range));
 }
 
 template <std::ranges::input_range Range>
-static constexpr auto mean(const Range& range) {
+constexpr auto mean(const Range& range) {
     using T = std::ranges::range_value_t<Range>;
     if (std::ranges::empty(range)) {
         return T{};
@@ -46,15 +43,20 @@ static constexpr auto mean(const Range& range) {
     return sum(range) / std::ranges::size(range);
 }
 
-static constexpr float bin_to_hz(float samplerate, size_t bins, auto bin) noexcept {
-    assert(bin < bins);
+inline constexpr float bin_to_hz(float samplerate, size_t bins, auto bin) noexcept {
+    // TODO: handle unexpected arguments
+    assert(static_cast<size_t>(bin) < bins);
     if (bins <= 1) {
         return 0.0f;
     }
     return 0.5f * samplerate * static_cast<float>(bin) / static_cast<float>(bins - 1);
 }
 
-static constexpr size_t hz_to_bin(float samplerate, size_t bins, float frequency) noexcept {
+inline constexpr size_t hz_to_bin(float samplerate, size_t bins, float frequency) noexcept {
+    // TODO: handle unexpected arguments
+    if (samplerate == 0.0f) {
+        return 0;
+    }
     assert(frequency >= 0.0f);
     assert(frequency <= 0.5f * samplerate);
     const auto bin = static_cast<float>(bins - 1) * frequency / (0.5f * samplerate);
@@ -64,21 +66,28 @@ static constexpr size_t hz_to_bin(float samplerate, size_t bins, float frequency
 namespace views {
 
 template <std::ranges::input_range Range>
-static constexpr auto square(const Range& range) {
+constexpr auto square(const Range& range) {
     return std::views::transform(range, [](auto v) { return v * v; });
 }
 
 template <std::ranges::input_range Range>
-static constexpr auto abs(const Range& range) {
+constexpr auto abs(const Range& range) {
     return std::views::transform(range, [](auto v) { return std::abs(v); });
 }
 
 template <std::ranges::input_range Range>
-static constexpr auto sqrt(const Range& range) {
+constexpr auto sqrt(const Range& range) {
     return std::views::transform(range, [](auto v) { return std::sqrt(v); });
 }
 
 }  // namespace views
+
+}  // namespace
+
+namespace openae::features {
+
+using Timedata = decltype(Input::timedata);
+using Spectrum = decltype(Input::spectrum);
 
 /* -------------------------------------------- Basic ------------------------------------------- */
 
@@ -171,6 +180,17 @@ static std::pmr::vector<float> power_spectrum_allocate(Env& env, Input input) {
 
 static auto power_spectrum_view(Spectrum spectrum) {
     return std::views::transform(spectrum, [](auto c) { return std::norm(c); });
+}
+
+float partial_power([[maybe_unused]] Env& env, Input input, float fmin, float fmax) {
+    fmin = std::clamp(fmin, 0.0f, 0.5f * input.samplerate);
+    fmax = std::clamp(fmax, fmin, 0.5f * input.samplerate);
+    const auto power_spectrum = power_spectrum_view(input.spectrum);
+    const auto power_spectrum_range = std::ranges::subrange(
+        power_spectrum.begin() + hz_to_bin(input.samplerate, power_spectrum.size(), fmin),
+        power_spectrum.begin() + hz_to_bin(input.samplerate, power_spectrum.size(), fmax)
+    );
+    return sum(power_spectrum_range) / sum(power_spectrum);
 }
 
 float spectral_centroid(Env& env, Input input) {

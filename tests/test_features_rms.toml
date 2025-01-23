@@ -1,26 +1,26 @@
 feature = "rms"
 
 [[tests]]
-name = "Empty input data"
+name = "empty input data"
 input.timedata = []
-output = 0.0
+result = 0.0
 
 [[tests]]
-name = "Zeros"
+name = "zeros"
 input.timedata = [0, 0, 0]
-output = 0.0
+result = 0.0
 
 [[tests]]
-name = "Ones"
+name = "ones"
 input.timedata = [1, 1]
-output = 1.0
+result = 1.0
 
 [[tests]]
-name = "Mixed signs"
+name = "mixed signs"
 input.timedata = [2, -2]
-output = 2.0
+result = 2.0
 
 [[tests]]
-name = "Slope"
+name = "slope"
 input.timedata = [-3, -2, -1, 0, 1, 2, 3]
-output = 2.0
+result = 2.0
