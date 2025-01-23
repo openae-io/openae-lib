@@ -36,10 +36,6 @@ constexpr auto sum(const Range& range) {
 
 template <std::ranges::input_range Range>
 constexpr auto mean(const Range& range) {
-    using T = std::ranges::range_value_t<Range>;
-    if (std::ranges::empty(range)) {
-        return T{};
-    }
     return sum(range) / std::ranges::size(range);
 }
 
