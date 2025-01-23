@@ -85,6 +85,10 @@ namespace openae::features {
 using Timedata = decltype(Input::timedata);
 using Spectrum = decltype(Input::spectrum);
 
+inline static std::pmr::memory_resource* mem_resource_or_default(Env& env) noexcept {
+    return env.mem_resource != nullptr ? env.mem_resource : std::pmr::get_default_resource();
+}
+
 /* -------------------------------------------- Basic ------------------------------------------- */
 
 float peak_amplitude([[maybe_unused]] Env& env, Input input) {
@@ -160,11 +164,11 @@ float kurtosis([[maybe_unused]] Env& env, Input input) {
     return standardized_moment<4>(input.timedata);
 }
 
-/* ------------------------------------------ Spectral ------------------------------------------ */
+    std::pmr::vector<float> power_spectrum(bins, mem_resource_or_default(env));
 
 static std::pmr::vector<float> power_spectrum_allocate(Env& env, Input input) {
     const auto bins = input.spectrum.size();
-    std::pmr::vector<float> power_spectrum(bins, env.mem_resource);
+    std::pmr::vector<float> power_spectrum(bins, mem_resource_or_default(env));
     std::transform(
         input.spectrum.begin(),
         input.spectrum.end(),
@@ -226,11 +230,11 @@ float spectral_centroid_inplace([[maybe_unused]] Env& env, Input input) {
 }
 
 float spectral_rolloff([[maybe_unused]] Env& env, Input input, float rolloff) {
-    if (input.spectrum.empty()) {
+    std::pmr::vector<float> acc(power_spectrum.size(), mem_resource_or_default(env));
         return 0.0f;
     }
     const auto power_spectrum = power_spectrum_view(input.spectrum);
-    std::pmr::vector<float> acc(power_spectrum.size(), env.mem_resource);
+    std::pmr::vector<float> acc(power_spectrum.size(), mem_resource_or_default(env));
     std::partial_sum(power_spectrum.begin(), power_spectrum.end(), acc.begin());
 
     const auto total = acc.back();
