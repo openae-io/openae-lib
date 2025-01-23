@@ -38,7 +38,7 @@ struct TestCase {
     double result;
 };
 
-struct TestFile {
+struct TestConfig {
     std::string feature;
     std::vector<TestCase> tests;
 };
@@ -109,15 +109,15 @@ static std::vector<TestCase> parse_test_cases(const toml::node& node) {
     return tests;
 }
 
-static TestFile parse_test_file(std::filesystem::path path) {
+static TestConfig parse_test_config(std::filesystem::path path) {
     const toml::table tbl = toml::parse_file(path.c_str());
-    return TestFile{
+    return TestConfig{
         .feature = tbl.at("feature").value<std::string>().value(),
         .tests = parse_test_cases(tbl.at("tests")),
     };
 }
 
-static std::vector<std::filesystem::path> find_test_files() {
+static std::vector<std::filesystem::path> find_test_configs() {
     std::vector<std::filesystem::path> files;
     for (const auto& entry : std::filesystem::directory_iterator(openae::test::test_dir)) {
         if (entry.is_regular_file() && entry.path().extension() == ".toml") {
@@ -133,45 +133,46 @@ static T cast_error(T value) {
 }
 
 TEST_CASE("Features") {
-    for (const auto& path : find_test_files()) {
+    for (const auto& path : find_test_configs()) {
         CAPTURE(path.filename());
-        const auto test_file = parse_test_file(path);
+        const auto test_config = parse_test_config(path);
+        DYNAMIC_SECTION(test_config.feature) {
+            for (const auto& test : test_config.tests) {
+                DYNAMIC_SECTION(test.name) {
+                    CAPTURE(test.name);
+                    CAPTURE(test.input.samplerate);
+                    CAPTURE(test.input.timedata);
+                    CAPTURE(test.input.spectrum);
+                    CAPTURE(test.parameters);
 
-        for (const auto& test : test_file.tests) {
-            DYNAMIC_SECTION(test.name) {
-                CAPTURE(test.name);
-                CAPTURE(test.input.samplerate);
-                CAPTURE(test.input.timedata);
-                CAPTURE(test.input.spectrum);
-                CAPTURE(test.parameters);
+                    auto algorithm = openae::features::make_algorithm(test_config.feature.c_str());
+                    REQUIRE(algorithm != nullptr);
 
-                auto algorithm = openae::features::make_algorithm(test_file.feature.c_str());
-                REQUIRE(algorithm != nullptr);
+                    for (const auto& [name, value] : test.parameters) {
+                        CAPTURE(name, value);
+                        REQUIRE(algorithm->set_parameter(name.c_str(), value));
+                        REQUIRE_THAT(
+                            algorithm->get_parameter(name.c_str()).value(),
+                            Catch::Matchers::WithinAbs(value, cast_error<float>(value))
+                        );
+                    }
 
-                for (const auto& [name, value] : test.parameters) {
-                    CAPTURE(name, value);
-                    REQUIRE(algorithm->set_parameter(name.c_str(), value));
-                    REQUIRE_THAT(
-                        algorithm->get_parameter(name.c_str()).value(),
-                        Catch::Matchers::WithinAbs(value, cast_error<float>(value))
-                    );
-                }
+                    openae::Env env{};
+                    const auto result = algorithm->process(env, test.input);
+                    CAPTURE(test.result, result);
 
-                openae::Env env{};
-                const auto result = algorithm->process(env, test.input);
-                CAPTURE(test.result, result);
-
-                if (std::isnan(test.result)) {
-                    REQUIRE(std::isnan(result));
-                } else if (std::isinf(test.result)) {
-                    REQUIRE(std::isinf(result));
-                } else {
-                    REQUIRE_THAT(
-                        result,
-                        Catch::Matchers::WithinAbs(
-                            test.result, cast_error<float>(test.result)
-                        )
-                    );
+                    if (std::isnan(test.result)) {
+                        REQUIRE(std::isnan(result));
+                    } else if (std::isinf(test.result)) {
+                        REQUIRE(std::isinf(result));
+                    } else {
+                        REQUIRE_THAT(
+                            result,
+                            Catch::Matchers::WithinAbs(
+                                test.result, cast_error<float>(test.result)
+                            )
+                        );
+                    }
                 }
             }
         }
