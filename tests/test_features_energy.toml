@@ -1,0 +1,30 @@
+feature = "energy"
+
+[[tests]]
+name = "empty input data"
+input.timedata = []
+result = nan
+
+[[tests]]
+name = "zeros"
+input.samplerate = 1
+input.timedata = [0, 0, 0]
+result = 0.0
+
+[[tests]]
+name = "ones"
+input.samplerate = 1
+input.timedata = [1, 1]
+result = 2
+
+[[tests]]
+name = "ones and zeros"
+input.samplerate = 1
+input.timedata = [1, 1, 0, 0, 0]
+result = 2
+
+[[tests]]
+name = "mixed signs"
+input.samplerate = 10
+input.timedata = [1, -2, 3, -4] # sum squares: 30
+result = 3.0 # 30/10
