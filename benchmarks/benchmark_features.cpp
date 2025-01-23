@@ -155,8 +155,6 @@ BENCHMARK_CAPTURE(run_default, kurtosis, openae::features::kurtosis)->Arg(vec_si
 BENCHMARK_CAPTURE(run_default, zero_crossing_rate, openae::features::zero_crossing_rate)->Arg(vec_size);
 BENCHMARK_CAPTURE(run_default, partial_power, openae::features::partial_power, 0.1f, 0.2f)->Arg(vec_size);
 BENCHMARK_CAPTURE(run_default, spectral_centroid, openae::features::spectral_centroid)->Arg(vec_size);
-BENCHMARK_CAPTURE(run_default, spectral_centroid_lazy, openae::features::spectral_centroid_lazy)->Arg(vec_size);
-BENCHMARK_CAPTURE(run_default, spectral_centroid_inplace, openae::features::spectral_centroid_inplace)->Arg(vec_size);
 BENCHMARK_CAPTURE(run_default, spectral_rolloff, openae::features::spectral_rolloff, 0.9f)->Arg(vec_size);
 
 BENCHMARK_CAPTURE(run_monotonic, spectral_rolloff, openae::features::spectral_rolloff, 0.9f)->Arg(vec_size);

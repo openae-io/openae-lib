@@ -164,9 +164,9 @@ float kurtosis([[maybe_unused]] Env& env, Input input) {
     return standardized_moment<4>(input.timedata);
 }
 
-    std::pmr::vector<float> power_spectrum(bins, mem_resource_or_default(env));
+/* ------------------------------------------ Spectral ------------------------------------------ */
 
-static std::pmr::vector<float> power_spectrum_allocate(Env& env, Input input) {
+[[maybe_unused]] static std::pmr::vector<float> power_spectrum_allocate(Env& env, Input input) {
     const auto bins = input.spectrum.size();
     std::pmr::vector<float> power_spectrum(bins, mem_resource_or_default(env));
     std::transform(
@@ -193,44 +193,21 @@ float partial_power([[maybe_unused]] Env& env, Input input, float fmin, float fm
     return sum(power_spectrum_range) / sum(power_spectrum);
 }
 
-float spectral_centroid(Env& env, Input input) {
-    const auto power_spectrum = power_spectrum_allocate(env, input);
-    const auto bins = power_spectrum.size();
-    float power_sum = 0;
-    float power_sum_weighted = 0;
-    for (size_t bin = 0; bin < bins; ++bin) {
-        power_sum += power_spectrum[bin];
-        power_sum_weighted += bin * power_spectrum[bin];
-    }
-    return bin_to_hz(input.samplerate, bins, power_sum_weighted / power_sum);
-}
-
-float spectral_centroid_lazy([[maybe_unused]] Env& env, Input input) {
+float spectral_centroid([[maybe_unused]] Env& env, Input input) {
+    // const auto power_spectrum = power_spectrum_allocate(env, input);
     const auto power_spectrum = power_spectrum_view(input.spectrum);
     const auto bins = power_spectrum.size();
     float power_sum = 0;
     float power_sum_weighted = 0;
     for (size_t bin = 0; bin < bins; ++bin) {
         power_sum += power_spectrum[bin];
-        power_sum_weighted += bin * power_spectrum[bin];
+        power_sum_weighted += power_spectrum[bin] * static_cast<float>(bin);
     }
     return bin_to_hz(input.samplerate, bins, power_sum_weighted / power_sum);
 }
 
-float spectral_centroid_inplace([[maybe_unused]] Env& env, Input input) {
-    const auto bins = input.spectrum.size();
-    float power_sum = 0;
-    float power_sum_weighted = 0;
-    for (size_t bin = 0; bin < bins; ++bin) {
-        const auto power = std::norm(input.spectrum[bin]);
-        power_sum += power;
-        power_sum_weighted += bin * power;
-    }
-    return bin_to_hz(input.samplerate, bins, power_sum_weighted / power_sum);
-}
-
-float spectral_rolloff([[maybe_unused]] Env& env, Input input, float rolloff) {
-    std::pmr::vector<float> acc(power_spectrum.size(), mem_resource_or_default(env));
+float spectral_rolloff(Env& env, Input input, float rolloff) {
+    if (input.spectrum.empty()) {
         return 0.0f;
     }
     const auto power_spectrum = power_spectrum_view(input.spectrum);
