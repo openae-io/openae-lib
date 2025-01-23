@@ -13,12 +13,12 @@ result = nan
 [[tests]]
 name = "ones"
 input.timedata = [1, 1, 1]
-result = 1
+result = 1.0
 
 [[tests]]
 name = "ones mixed signs"
 input.timedata = [1, -1, 1]
-result = 1
+result = 1.0
 
 [[tests]]
 name = "ramp"

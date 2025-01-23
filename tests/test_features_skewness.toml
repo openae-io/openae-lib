@@ -1,0 +1,38 @@
+feature = "skewness"
+
+[[tests]]
+name = "empty input"
+input.timedata = []
+result = 0
+
+[[tests]]
+name = "zeros"
+input.timedata = [0, 0, 0, 0]
+result = nan
+
+[[tests]]
+name = "ones"
+input.timedata = [1, 1, 1, 1]
+result = nan
+
+[[tests]]
+name = "ones mixed signs"
+input.timedata = [1, -1, 1, -1]
+result = 0.0
+
+[[tests]]
+name = "ramp"
+input.timedata = [-3, -2, -1, 0, 1, 2, 3]
+result = 0.0
+
+[[tests]]
+name = "positive skew"
+input.timedata = [-1, -1, -1, 0]
+# y = np.array([-1, -1, -1, 0], dtype=np.float32)
+# np.mean(np.power(y - np.mean(y), 3, dtype=np.float32)) / np.power(np.std(y), 3, dtype=np.float32)
+result = 1.1547006
+
+[[tests]]
+name = "negative skew"
+input.timedata = [0, 1, 1, 1]
+result = -1.1547006
