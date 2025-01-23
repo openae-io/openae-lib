@@ -1,0 +1,28 @@
+feature = "clearance-factor"
+
+[[tests]]
+name = "empty input"
+input.timedata = []
+result = nan
+
+[[tests]]
+name = "zeros"
+input.timedata = [0, 0, 0]
+result = nan
+
+[[tests]]
+name = "ones"
+input.timedata = [1, 1, 1]
+result = 1
+
+[[tests]]
+name = "ones mixed signs"
+input.timedata = [1, -1, 1]
+result = 1
+
+[[tests]]
+name = "slope"
+input.timedata = [-3, -2, -1, 0, 1, 2, 3]
+# y = np.array([-3, -2, -1, 0, 1, 2, 3], dtype=np.float32)
+# np.abs(y).max() / np.mean(np.sqrt(np.abs(y)))**2
+result = 2.137683723718755
