@@ -1,0 +1,26 @@
+feature = "impulse-factor"
+
+[[tests]]
+name = "empty input"
+input.timedata = []
+result = nan
+
+[[tests]]
+name = "zeros"
+input.timedata = [0, 0, 0]
+result = nan
+
+[[tests]]
+name = "ones"
+input.timedata = [1, 1, 1]
+result = 1
+
+[[tests]]
+name = "ones mixed signs"
+input.timedata = [1, -1, 1]
+result = 1
+
+[[tests]]
+name = "slope"
+input.timedata = [-3, -2, -1, 0, 1, 2, 3]
+result = 1.75 # 3/(12/7)

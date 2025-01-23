@@ -29,6 +29,7 @@ consteval auto meta() {
         Feature{&energy, "energy", {}},
         Feature{&rms, "rms", {}},
         Feature{&crest_factor, "crest-factor", {}},
+        Feature{&impulse_factor, "impulse-factor", {}},
         Feature{&partial_power, "partial-power", {Parameter{"fmin"}, Parameter{"fmax"}}},
         Feature{&spectral_rolloff, "spectral-rolloff", {Parameter{"rolloff"}}},
     };
