@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cassert>
 #include <cstdint>
+#include <limits>
 #include <numeric>  // reduce
 #include <ranges>
 #include <type_traits>
@@ -14,6 +15,11 @@
 #include "hash.hpp"
 
 namespace {
+
+template <std::floating_point T>
+constexpr T quite_nan() noexcept {
+    return std::numeric_limits<T>::quiet_NaN();
+}
 
 /// Ìntegral-valued powers
 /// @see https://en.wikipedia.org/wiki/Exponentiation_by_squaring
@@ -40,19 +46,19 @@ constexpr auto mean(const Range& range) {
 }
 
 inline constexpr float bin_to_hz(float samplerate, size_t bins, auto bin) noexcept {
+    if (bins <= 1) {
+        return quite_nan<float>();
+    }
     // TODO: handle unexpected arguments
     assert(static_cast<size_t>(bin) < bins);
-    if (bins <= 1) {
-        return 0.0f;
-    }
     return 0.5f * samplerate * static_cast<float>(bin) / static_cast<float>(bins - 1);
 }
 
 inline constexpr size_t hz_to_bin(float samplerate, size_t bins, float frequency) noexcept {
-    // TODO: handle unexpected arguments
     if (samplerate == 0.0f) {
         return 0;
     }
+    // TODO: handle unexpected arguments
     assert(frequency >= 0.0f);
     assert(frequency <= 0.5f * samplerate);
     const auto bin = static_cast<float>(bins - 1) * frequency / (0.5f * samplerate);
@@ -149,7 +155,7 @@ static float central_moment(Timedata y, float y_mean) {
 template <size_t N>
 static float standardized_moment(Timedata y) {
     if (y.size() < N) {
-        return 0.0f;
+        return quite_nan<float>();
     }
     const auto y_mean = mean(y);
     const auto y_variance = central_moment<2>(y, y_mean);
