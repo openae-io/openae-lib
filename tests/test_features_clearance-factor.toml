@@ -21,8 +21,8 @@ input.timedata = [1, -1, 1]
 result = 1
 
 [[tests]]
-name = "slope"
+name = "ramp"
 input.timedata = [-3, -2, -1, 0, 1, 2, 3]
 # y = np.array([-3, -2, -1, 0, 1, 2, 3], dtype=np.float32)
-# np.abs(y).max() / np.mean(np.sqrt(np.abs(y)))**2
+# np.max(np.abs(y)) / np.mean(np.sqrt(np.abs(y)))**2
 result = 2.137683723718755

@@ -31,7 +31,12 @@ consteval auto meta() {
         Feature{&crest_factor, "crest-factor", {}},
         Feature{&impulse_factor, "impulse-factor", {}},
         Feature{&clearance_factor, "clearance-factor", {}},
+        Feature{&shape_factor, "shape-factor", {}},
+        Feature{&skewness, "skewness", {}},
+        Feature{&kurtosis, "kurtosis", {}},
+        Feature{&zero_crossing_rate, "zero-crossing-rate", {}},
         Feature{&partial_power, "partial-power", {Parameter{"fmin"}, Parameter{"fmax"}}},
+        Feature{&spectral_centroid, "spectral-centroid"},
         Feature{&spectral_rolloff, "spectral-rolloff", {Parameter{"rolloff"}}},
     };
 }

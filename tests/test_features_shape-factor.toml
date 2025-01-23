@@ -1,4 +1,4 @@
-feature = "crest-factor"
+feature = "shape-factor"
 
 [[tests]]
 name = "empty input"
@@ -23,4 +23,6 @@ result = 1
 [[tests]]
 name = "ramp"
 input.timedata = [-3, -2, -1, 0, 1, 2, 3]
-result = 1.5 # 3/2
+# y = np.array([-3, -2, -1, 0, 1, 2, 3], dtype=np.float32)
+# np.sqrt(np.mean(y**2)) / np.mean(np.abs(y))
+result = 1.1666666

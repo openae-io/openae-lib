@@ -21,6 +21,6 @@ input.timedata = [2, -2]
 result = 2.0
 
 [[tests]]
-name = "slope"
+name = "ramp"
 input.timedata = [-3, -2, -1, 0, 1, 2, 3]
 result = 2.0
