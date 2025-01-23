@@ -1,0 +1,26 @@
+feature = "peak-amplitude"
+
+[[tests]]
+name = "empty input"
+input.timedata = []
+result = 0
+
+[[tests]]
+name = "zeros"
+input.timedata = [0, 0, 0]
+result = 0
+
+[[tests]]
+name = "ones"
+input.timedata = [1, 1, 1]
+result = 1
+
+[[tests]]
+name = "positive peak"
+input.timedata = [1, 2, 0]
+result = 2
+
+[[tests]]
+name = "negative peak"
+input.timedata = [1, -2, 0]
+result = 2

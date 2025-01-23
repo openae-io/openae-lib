@@ -1,7 +1,7 @@
 feature = "energy"
 
 [[tests]]
-name = "empty input data"
+name = "empty input"
 input.timedata = []
 result = nan
 

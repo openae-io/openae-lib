@@ -1,7 +1,7 @@
 feature = "partial-power"
 
 [[tests]]
-name = "empty input data"
+name = "empty input"
 input.spectrum = []
 params.fmin = 0
 params.fmax = 0
