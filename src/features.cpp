@@ -45,7 +45,7 @@ constexpr auto mean(const Range& range) {
     return sum(range) / std::ranges::size(range);
 }
 
-inline constexpr float bin_to_hz(float samplerate, size_t bins, auto bin) noexcept {
+constexpr float bin_to_hz(float samplerate, size_t bins, auto bin) noexcept {
     if (bins <= 1) {
         return quite_nan<float>();
     }
@@ -54,8 +54,8 @@ inline constexpr float bin_to_hz(float samplerate, size_t bins, auto bin) noexce
     return 0.5f * samplerate * static_cast<float>(bin) / static_cast<float>(bins - 1);
 }
 
-inline constexpr size_t hz_to_bin(float samplerate, size_t bins, float frequency) noexcept {
-    if (samplerate == 0.0f) {
+constexpr size_t hz_to_bin(float samplerate, size_t bins, float frequency) noexcept {
+    if (samplerate == 0.0f || bins <= 1) {
         return 0;
     }
     // TODO: handle unexpected arguments
