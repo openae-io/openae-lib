@@ -39,6 +39,7 @@ consteval auto meta() {
         Feature{&spectral_peak_frequency, "spectral-peak-frequency", {}},
         Feature{&spectral_centroid, "spectral-centroid", {}},
         Feature{&spectral_variance, "spectral-variance", {}},
+        Feature{&spectral_skewness, "spectral-skewness", {}},
         Feature{&spectral_rolloff, "spectral-rolloff", {Parameter{"rolloff"}}},
     };
 }

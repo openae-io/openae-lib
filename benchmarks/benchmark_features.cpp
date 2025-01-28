@@ -157,6 +157,7 @@ BENCHMARK_CAPTURE(run_default, partial_power, openae::features::partial_power, 0
 BENCHMARK_CAPTURE(run_default, spectral_peak_frequency, openae::features::spectral_peak_frequency)->Arg(vec_size);
 BENCHMARK_CAPTURE(run_default, spectral_centroid, openae::features::spectral_centroid)->Arg(vec_size);
 BENCHMARK_CAPTURE(run_default, spectral_variance, openae::features::spectral_variance)->Arg(vec_size);
+BENCHMARK_CAPTURE(run_default, spectral_skewness, openae::features::spectral_skewness)->Arg(vec_size);
 BENCHMARK_CAPTURE(run_default, spectral_rolloff, openae::features::spectral_rolloff, 0.9f)->Arg(vec_size);
 
 BENCHMARK_CAPTURE(run_monotonic, spectral_rolloff, openae::features::spectral_rolloff, 0.9f)->Arg(vec_size);

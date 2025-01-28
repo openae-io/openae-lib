@@ -160,8 +160,7 @@ static float standardized_moment(Timedata y) {
         return quite_nan<float>();
     }
     const auto y_mean = mean(y);
-    const auto y_variance = central_moment<2>(y, y_mean);
-    return central_moment<N>(y, y_mean) / pow<N>(std::sqrt(y_variance));
+    return central_moment<N>(y, y_mean) / pow<N>(std::sqrt(central_moment<2>(y, y_mean)));
 }
 
 float skewness([[maybe_unused]] Env& env, Input input) {
@@ -228,21 +227,33 @@ float spectral_centroid([[maybe_unused]] Env& env, Input input) {
     return bin_to_hz(input.samplerate, bins, bin);
 }
 
-float spectral_variance(Env& env, Input input) {
+template <size_t N>
+static float spectral_central_moment([[maybe_unused]] Env& env, Input input, float f_centroid) {
     const auto power_spectrum = power_spectrum_view(input.spectrum);
-    if (power_spectrum.empty()) {
-        return quite_nan<float>();
-    }
     const auto bins = power_spectrum.size();
-    const auto f_centroid = spectral_centroid(env, input);
     float power_sum = 0.0f;
     float power_sum_weighted = 0.0f;
     for (size_t bin = 0; bin < bins; ++bin) {
         const auto f = bin_to_hz(input.samplerate, bins, bin);
         power_sum += power_spectrum[bin];
-        power_sum_weighted += power_spectrum[bin] * pow<2>(f - f_centroid);
+        power_sum_weighted += power_spectrum[bin] * pow<N>(f - f_centroid);
     }
     return power_sum_weighted / power_sum;
+}
+
+template <size_t N>
+static float spectral_standardized_moment([[maybe_unused]] Env& env, Input input) {
+    const auto f_centroid = spectral_centroid(env, input);
+    return spectral_central_moment<N>(env, input, f_centroid) /
+        pow<N>(std::sqrt(spectral_central_moment<2>(env, input, f_centroid)));
+}
+
+float spectral_variance(Env& env, Input input) {
+    return spectral_central_moment<2>(env, input, spectral_centroid(env, input));
+}
+
+float spectral_skewness(Env& env, Input input) {
+    return spectral_standardized_moment<3>(env, input);
 }
 
 float spectral_rolloff(Env& env, Input input, float rolloff) {
