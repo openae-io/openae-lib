@@ -1,0 +1,46 @@
+feature = "spectral-rolloff"
+
+[[tests]]
+name = "empty input"
+input.spectrum = []
+result = 0.0
+
+[[tests]]
+name = "ones 0%"
+input.samplerate = 20
+input.spectrum = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+# frequencies:    0  1  2  3  4  5  6  7  8  9  10
+params.rolloff = 0.0
+result = 0.0
+
+[[tests]]
+name = "ones 50%"
+input.samplerate = 20
+input.spectrum = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+# frequencies:    0  1  2  3  4  5  6  7  8  9  10
+params.rolloff = 0.5
+result = 5.0
+
+[[tests]]
+name = "ones 90%"
+input.samplerate = 20
+input.spectrum = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+# frequencies:    0  1  2  3  4  5  6  7  8  9  10
+params.rolloff = 0.9
+result = 9.0
+
+[[tests]]
+name = "step 50%"
+input.samplerate = 10
+input.spectrum = [1, 1, 1, 1, 2, 2]
+# frequencies:    0  1  2  3  4  5
+params.rolloff = 0.5
+result = 4.0 # would be 3.0 with magnitude spectrum
+
+[[tests]]
+name = "single peak 50%"
+input.samplerate = 8
+input.spectrum = [0, 0, 0, 2, 0]
+# frequencies:    0  1  2  3  4
+params.rolloff = 0.5
+result = 3.0

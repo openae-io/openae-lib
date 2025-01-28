@@ -201,7 +201,7 @@ float partial_power([[maybe_unused]] Env& env, Input input, float fmin, float fm
 }
 
 float spectral_centroid([[maybe_unused]] Env& env, Input input) {
-    // TODO: workaround to prevent bin = 0 / 0, which returns not NaN with MSVC
+    // TODO: workaround to prevent bin = 0 / 0, which returns NOT NaN with MSVC
     if (input.spectrum.empty()) {
         return quite_nan<float>();
     }
