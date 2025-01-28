@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cassert>
 #include <cstdint>
+#include <iterator>
 #include <limits>
 #include <numeric>  // reduce
 #include <ranges>
@@ -198,6 +199,16 @@ float partial_power([[maybe_unused]] Env& env, Input input, float fmin, float fm
         power_spectrum.begin() + hz_to_bin(input.samplerate, power_spectrum.size(), fmax)
     );
     return sum(power_spectrum_range) / sum(power_spectrum);
+}
+
+float spectral_peak_frequency([[maybe_unused]] Env& env, Input input) {
+    const auto power_spectrum = power_spectrum_view(input.spectrum);
+    const auto it = std::ranges::max_element(power_spectrum);
+    if (it == power_spectrum.end()) {
+        return quite_nan<float>();
+    }
+    const auto bin = std::distance(power_spectrum.begin(), it);
+    return bin_to_hz(input.samplerate, power_spectrum.size(), bin);
 }
 
 float spectral_centroid([[maybe_unused]] Env& env, Input input) {

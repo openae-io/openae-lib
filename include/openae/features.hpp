@@ -33,6 +33,7 @@ float kurtosis(Env& env, Input input);
 float zero_crossing_rate(Env& env, Input input);
 
 float partial_power(Env& env, Input input, float fmin, float fmax);
+float spectral_peak_frequency(Env& env, Input input);
 float spectral_centroid(Env& env, Input input);
 float spectral_rolloff(Env& env, Input input, float rolloff);
 

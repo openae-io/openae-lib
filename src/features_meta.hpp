@@ -36,7 +36,8 @@ consteval auto meta() {
         Feature{&kurtosis, "kurtosis", {}},
         Feature{&zero_crossing_rate, "zero-crossing-rate", {}},
         Feature{&partial_power, "partial-power", {Parameter{"fmin"}, Parameter{"fmax"}}},
-        Feature{&spectral_centroid, "spectral-centroid"},
+        Feature{&spectral_peak_frequency, "spectral-peak-frequency", {}},
+        Feature{&spectral_centroid, "spectral-centroid", {}},
         Feature{&spectral_rolloff, "spectral-rolloff", {Parameter{"rolloff"}}},
     };
 }
