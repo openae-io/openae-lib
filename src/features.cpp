@@ -18,6 +18,7 @@ namespace {
 
 template <std::floating_point T>
 constexpr T quite_nan() noexcept {
+    static_assert(std::numeric_limits<T>::has_quiet_NaN);
     return std::numeric_limits<T>::quiet_NaN();
 }
 
@@ -50,7 +51,7 @@ constexpr float bin_to_hz(float samplerate, size_t bins, auto bin) noexcept {
         return quite_nan<float>();
     }
     // TODO: handle unexpected arguments
-    assert(static_cast<size_t>(bin) < bins);
+    // assert(static_cast<float>(bin) <= static_cast<float>(bins - 1));
     return 0.5f * samplerate * static_cast<float>(bin) / static_cast<float>(bins - 1);
 }
 
@@ -200,16 +201,20 @@ float partial_power([[maybe_unused]] Env& env, Input input, float fmin, float fm
 }
 
 float spectral_centroid([[maybe_unused]] Env& env, Input input) {
-    // const auto power_spectrum = power_spectrum_allocate(env, input);
+    // TODO: workaround to prevent bin = 0 / 0, which returns not NaN with MSVC
+    if (input.spectrum.empty()) {
+        return quite_nan<float>();
+    }
     const auto power_spectrum = power_spectrum_view(input.spectrum);
     const auto bins = power_spectrum.size();
-    float power_sum = 0;
-    float power_sum_weighted = 0;
+    float power_sum = 0.0f;
+    float power_sum_weighted = 0.0f;
     for (size_t bin = 0; bin < bins; ++bin) {
         power_sum += power_spectrum[bin];
         power_sum_weighted += power_spectrum[bin] * static_cast<float>(bin);
     }
-    return bin_to_hz(input.samplerate, bins, power_sum_weighted / power_sum);
+    const auto bin = power_sum_weighted / power_sum;
+    return bin_to_hz(input.samplerate, bins, bin);
 }
 
 float spectral_rolloff(Env& env, Input input, float rolloff) {

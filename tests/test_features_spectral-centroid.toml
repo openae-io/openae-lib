@@ -1,0 +1,39 @@
+feature = "spectral-centroid"
+
+[[tests]]
+name = "empty input"
+input.spectrum = []
+result = nan
+
+[[tests]]
+name = "zeros"
+input.samplerate = 1.0
+input.spectrum = [0, 0, 0]
+result = nan # 0/0
+
+[[tests]]
+name = "ones"
+input.samplerate = 1.0
+input.spectrum = [1, 1, 1]
+result = 0.25 # center, fs / 4
+
+[[tests]]
+name = "zeros with single peak"
+input.samplerate = 8.0
+input.spectrum = [0, 0, 0, 5, 0]
+# frequencies:    0  1  2  3  4
+result = 3
+
+[[tests]]
+name = "zeros with wide symmetric peak"
+input.samplerate = 12.0
+input.spectrum = [0, 0, 1, 2, 2, 1, 0]
+# frequencies:    0  1  2  3  4  5  6
+result = 3.5
+
+[[tests]]
+name = "zeros with two peaks"
+input.samplerate = 12.0
+input.spectrum = [0, 0, 2, 0, 0, 4, 0]
+# frequencies:    0  1  2  3  4  5  6
+result = 4.4 # (2*4 + 5*16) / (4 + 16)
