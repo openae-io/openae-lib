@@ -38,6 +38,7 @@ consteval auto meta() {
         Feature{&partial_power, "partial-power", {Parameter{"fmin"}, Parameter{"fmax"}}},
         Feature{&spectral_peak_frequency, "spectral-peak-frequency", {}},
         Feature{&spectral_centroid, "spectral-centroid", {}},
+        Feature{&spectral_variance, "spectral-variance", {}},
         Feature{&spectral_rolloff, "spectral-rolloff", {Parameter{"rolloff"}}},
     };
 }

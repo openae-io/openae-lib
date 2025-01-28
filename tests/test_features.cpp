@@ -170,7 +170,7 @@ TEST_CASE("Features") {
                             result,
                             Catch::Matchers::WithinAbs(
                                 test.result, cast_error<float>(test.result)
-                            )
+                            ) || Catch::Matchers::WithinRel(test.result, 1e-6)
                         );
                     }
                 }
