@@ -37,6 +37,7 @@ float spectral_peak_frequency(Env& env, Input input);
 float spectral_centroid(Env& env, Input input);
 float spectral_variance(Env& env, Input input);
 float spectral_skewness(Env& env, Input input);
+float spectral_kurtosis(Env& env, Input input);
 float spectral_rolloff(Env& env, Input input, float rolloff);
 
 /* ------------------------------------- Algorithm interface ------------------------------------ */

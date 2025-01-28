@@ -1,0 +1,21 @@
+feature = "spectral-kurtosis"
+
+[[tests]]
+name = "empty input"
+input.spectrum = []
+result = nan
+
+[[tests]]
+name = "zeros"
+input.samplerate = 1.0
+input.spectrum = [0, 0, 0]
+result = nan
+
+[[tests]]
+name = "zeros with two peaks"
+input.samplerate = 12.0
+input.spectrum = [0, 0, 2, 0, 0, 4, 0]
+# frequencies:    0  1  2  3  4  5  6
+# f_centroid: 4.4
+# spectral_variance: 1.44
+result = 3.25 # (4*(2-4.4)**4 + 16*(5-4.4)**4) / (4 + 16) / (1.44)**(4/2)

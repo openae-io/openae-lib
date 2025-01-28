@@ -256,6 +256,10 @@ float spectral_skewness(Env& env, Input input) {
     return spectral_standardized_moment<3>(env, input);
 }
 
+float spectral_kurtosis(Env& env, Input input) {
+    return spectral_standardized_moment<4>(env, input);
+}
+
 float spectral_rolloff(Env& env, Input input, float rolloff) {
     if (input.spectrum.empty()) {
         return 0.0f;
