@@ -231,10 +231,11 @@ template <size_t N>
 static float spectral_central_moment([[maybe_unused]] Env& env, Input input, float f_centroid) {
     const auto power_spectrum = power_spectrum_view(input.spectrum);
     const auto bins = power_spectrum.size();
+    const auto factor_bin_to_hz = bin_to_hz(input.samplerate, bins, 1);
     float power_sum = 0.0f;
     float power_sum_weighted = 0.0f;
     for (size_t bin = 0; bin < bins; ++bin) {
-        const auto f = bin_to_hz(input.samplerate, bins, bin);
+        const auto f = factor_bin_to_hz * static_cast<float>(bin);
         power_sum += power_spectrum[bin];
         power_sum_weighted += power_spectrum[bin] * pow<N>(f - f_centroid);
     }
