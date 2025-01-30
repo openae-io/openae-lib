@@ -43,9 +43,9 @@ constexpr size_t vec_size = 65536;
 BENCHMARK(benchmark_sum)->Arg(vec_size);
 BENCHMARK(benchmark_std_hash)->Arg(vec_size);
 BENCHMARK_CAPTURE(benchmark_xxhash, xxh32, XXH32)->Arg(vec_size);
-BENCHMARK_CAPTURE(benchmark_xxhash, xxh32, XXH64)->Arg(vec_size);
+BENCHMARK_CAPTURE(benchmark_xxhash, xxh64, XXH64)->Arg(vec_size);
 #ifdef XXH128
-BENCHMARK_CAPTURE(benchmark_xxhash, xxh32, XXH128)->Arg(vec_size);
+BENCHMARK_CAPTURE(benchmark_xxhash, xxh128, XXH128)->Arg(vec_size);
 #endif
 
 BENCHMARK_MAIN();
