@@ -47,6 +47,28 @@ constexpr auto mean(const Range& range) {
     return sum(range) / std::ranges::size(range);
 }
 
+template <std::ranges::input_range Range>
+constexpr auto max_element(const Range& range) {
+    // with optimized version for views (lazy evaluation)
+    if constexpr (std::ranges::view<Range>) {
+        if (range.empty()) {
+            return range.end();
+        }
+        auto it = range.begin();
+        auto largest = range.begin();
+        auto largest_value = *largest;  // cache largest value to avoid recomputation in lazy views
+        while (++it != range.end()) {
+            if (*it > largest_value) {
+                largest = it;
+                largest_value = *it;
+            }
+        }
+        return largest;
+    } else {
+        return std::ranges::max_element(range);
+    }
+}
+
 constexpr float bin_to_hz(float samplerate, size_t bins, auto bin) noexcept {
     if (bins <= 1) {
         return quite_nan<float>();
@@ -202,7 +224,7 @@ float partial_power([[maybe_unused]] Env& env, Input input, float fmin, float fm
 
 float spectral_peak_frequency([[maybe_unused]] Env& env, Input input) {
     const auto power_spectrum = power_spectrum_view(input.spectrum);
-    const auto it = std::ranges::max_element(power_spectrum);
+    const auto it = max_element(power_spectrum);
     if (it == power_spectrum.end()) {
         return quite_nan<float>();
     }
