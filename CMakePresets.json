@@ -36,6 +36,13 @@
                 "OPENAE_BUILD_TESTS": "ON",
                 "OPENAE_BUILD_BENCHMARKS": "ON"
             }
+        },
+        {
+            "name": "benchmarks",
+            "inherits": ["release"],
+            "cacheVariables": {
+                "OPENAE_BUILD_BENCHMARKS": "ON"
+            }
         }
     ],
     "buildPresets": [
