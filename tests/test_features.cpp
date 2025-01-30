@@ -21,7 +21,12 @@ struct OwningInput {
     std::vector<std::complex<float>> spectrum;
 
     operator openae::features::Input() const {
-        return {.samplerate = samplerate, .timedata = timedata, .spectrum = spectrum};
+        return {
+            .samplerate = samplerate,
+            .timedata = timedata,
+            .spectrum = spectrum,
+            .fingerprint = {},
+        };
     }
 };
 

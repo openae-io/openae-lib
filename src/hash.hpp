@@ -26,14 +26,14 @@ inline void hash_combine(std::size_t& seed, const T& v, Rest... rest) {
 namespace std {
 
 template <>
-struct std::hash<openae::Env> {
+struct hash<openae::Env> {
     size_t operator()([[maybe_unused]] const openae::Env& env) const noexcept {
         return 0;
     }
 };
 
 template <typename T>
-struct std::hash<std::span<T>> {
+struct hash<std::span<T>> {
     size_t operator()(std::span<T> arr) const noexcept {
 #ifdef XXH128
         return XXH128(arr.data(), arr.size() * sizeof(T), arr.size() /* seed */).low64;
@@ -44,7 +44,7 @@ struct std::hash<std::span<T>> {
 };
 
 template <>
-struct std::hash<openae::features::Input> {
+struct hash<openae::features::Input> {
     size_t operator()(const openae::features::Input& input) const noexcept {
         // use user-defined fingerprint/hash if provided
         if (input.fingerprint.has_value()) {

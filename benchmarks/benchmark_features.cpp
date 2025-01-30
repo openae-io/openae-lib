@@ -49,6 +49,7 @@ struct OwningInput {
             .samplerate = samplerate,
             .timedata = timedata,
             .spectrum = spectrum,
+            .fingerprint = {},
         };
     }
 };
@@ -69,7 +70,7 @@ static void run_default(benchmark::State& state, Func&& func, Args... args) {
 
     const auto input = make_random_input(1, state.range(0));
     for (auto _ : state) {
-        const auto result = func(env, input, args...);
+        auto result = func(env, input, args...);
         benchmark::DoNotOptimize(result);
     }
     state.SetItemsProcessed(state.iterations() * state.range(0));
@@ -86,7 +87,7 @@ static void run_cached(benchmark::State& state, Func&& func, Args... args) {
 
     const auto input = make_random_input(1, state.range(0));
     for (auto _ : state) {
-        const auto result = func(env, input, args...);
+        auto result = func(env, input, args...);
         benchmark::DoNotOptimize(result);
     }
     state.SetItemsProcessed(state.iterations() * state.range(0));
@@ -106,7 +107,7 @@ static void run_monotonic(benchmark::State& state, Func&& func, Args... args) {
         env.mem_resource = &buffer_resource;
         state.ResumeTiming();
 
-        const auto result = func(env, input, args...);
+        auto result = func(env, input, args...);
         benchmark::DoNotOptimize(result);
     }
     state.SetItemsProcessed(state.iterations() * state.range(0));
@@ -124,7 +125,7 @@ static void run_pool(benchmark::State& state, Func&& func, Args... args) {
 
     const auto input = make_random_input(1, state.range(0));
     for (auto _ : state) {
-        const auto result = func(env, input, args...);
+        auto result = func(env, input, args...);
         benchmark::DoNotOptimize(result);
     }
     state.SetItemsProcessed(state.iterations() * state.range(0));
@@ -136,7 +137,7 @@ static void run_algorithm(benchmark::State& state, const char* identifier) {
     auto algorithm = openae::features::make_algorithm(identifier);
     const auto input = make_random_input(1, state.range(0));
     for (auto _ : state) {
-        const auto result = algorithm->process(env, input);
+        auto result = algorithm->process(env, input);
         benchmark::DoNotOptimize(result);
     }
 }
