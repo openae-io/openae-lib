@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.20) # should be 3.23 but Python build fails with scikit-build-core
 
 project(
     openae
@@ -67,17 +67,29 @@ endif()
 
 find_package(xxHash REQUIRED)
 
-add_library(
-    openae
-    src/common.cpp
-    src/features.cpp
+configure_file(
+    ${PROJECT_SOURCE_DIR}/include/openae/config.hpp.in
+    ${PROJECT_BINARY_DIR}/include/openae/config.hpp
+    @ONLY
 )
+
+add_library(openae)
 add_library(openae::openae ALIAS openae)
-target_include_directories(
+target_sources(
     openae
     PUBLIC
-        $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
-        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+        FILE_SET openae_headers
+            TYPE HEADERS
+            BASE_DIRS
+                ${PROJECT_BINARY_DIR}/include
+                ${PROJECT_SOURCE_DIR}/include
+            FILES
+                ${PROJECT_BINARY_DIR}/include/openae/config.hpp
+                ${PROJECT_SOURCE_DIR}/include/openae/common.hpp
+                ${PROJECT_SOURCE_DIR}/include/openae/features.hpp
+    PRIVATE
+        src/common.cpp
+        src/features.cpp
 )
 target_link_libraries(
     openae
@@ -85,12 +97,12 @@ target_link_libraries(
         $<BUILD_INTERFACE:openae_project_options>
         xxHash::xxhash
 )
-set_target_properties(openae PROPERTIES POSITION_INDEPENDENT_CODE ON)
-
-option(OPENAE_BUILD_PYTHON "Build Python bindings" OFF)
-if(OPENAE_BUILD_PYTHON)
-    add_subdirectory(bindings/python)
-endif()
+set_target_properties(
+    openae
+    PROPERTIES
+        VERIFY_INTERFACE_HEADER_SETS ON
+        POSITION_INDEPENDENT_CODE ON
+)
 
 # tests
 option(OPENAE_BUILD_TESTS "Build unit tests" OFF)
@@ -104,6 +116,10 @@ endif()
 option(OPENAE_BUILD_BENCHMARKS "Build benchmarks" OFF)
 if(OPENAE_BUILD_BENCHMARKS)
     message(STATUS "Benchmarks enabled")
-    enable_testing()
     add_subdirectory(benchmarks)
+endif()
+
+option(OPENAE_BUILD_PYTHON "Build Python bindings" OFF)
+if(OPENAE_BUILD_PYTHON)
+    add_subdirectory(bindings/python)
 endif()

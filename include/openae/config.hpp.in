@@ -1,0 +1,10 @@
+#pragma once
+
+namespace openae {
+
+#define OPENAE_VERSION "@PROJECT_VERSION@"
+#define OPENAE_VERSION_MAJOR @PROJECT_VERSION_MAJOR@
+#define OPENAE_VERSION_MINOR @PROJECT_VERSION_MINOR@
+#define OPENAE_VERSION_PATCH @PROJECT_VERSION_PATCH@
+
+}  // namespace openae

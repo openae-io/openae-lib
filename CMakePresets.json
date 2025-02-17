@@ -2,7 +2,7 @@
     "version": 3,
     "cmakeMinimumRequired": {
         "major": 3,
-        "minor": 21,
+        "minor": 23,
         "patch": 0
     },
     "configurePresets": [
@@ -31,10 +31,12 @@
         {
             "name": "dev",
             "inherits": ["debug"],
+            "installDir": "${sourceDir}/install/${presetName}",
             "cacheVariables": {
                 "OPENAE_WARNINGS_AS_ERRORS": "ON",
                 "OPENAE_BUILD_TESTS": "ON",
-                "OPENAE_BUILD_BENCHMARKS": "ON"
+                "OPENAE_BUILD_BENCHMARKS": "ON",
+                "OPENAE_BUILD_PYTHON": "ON"
             }
         },
         {
