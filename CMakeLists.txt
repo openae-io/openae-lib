@@ -86,6 +86,12 @@ target_link_libraries(
         $<BUILD_INTERFACE:openae_project_options>
         xxHash::xxhash
 )
+set_target_properties(openae PROPERTIES POSITION_INDEPENDENT_CODE ON)
+
+option(OPENAE_BUILD_PYTHON "Build Python bindings" OFF)
+if(OPENAE_BUILD_PYTHON)
+    add_subdirectory(bindings/python)
+endif()
 
 # tests
 option(OPENAE_BUILD_TESTS "Build unit tests" OFF)

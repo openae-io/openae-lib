@@ -14,7 +14,7 @@ std::unique_ptr<Cache, void(*)(Cache*)> make_cache() {
 }
 
 void log(Env& env, LogLevel level, const char* msg) {
-    if (env.logger != nullptr && static_cast<int>(level) >= static_cast<int>(env.log_level)) {
+    if (env.logger != nullptr) {
         env.logger(level, msg);
     }
 }

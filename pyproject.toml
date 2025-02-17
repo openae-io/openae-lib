@@ -1,0 +1,108 @@
+[build-system]
+requires = ["scikit-build-core>=0.10", "nanobind>=2.5"]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "openae"
+version = "0.1.0"
+description = "Implementation of the OpenAE standards for real-time acoustic emission signal processing"
+authors = [{ name = "Lukas Berbuer", email = "lukas.berbuer@vallen.de" }]
+readme = "README.md"
+license = { text = "MIT License" }
+requires-python = ">=3.8"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Operating System :: OS Independent",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Software Development",
+    "Topic :: Software Development :: Libraries",
+]
+keywords = [
+    "openae",
+    "acoustic emission",
+    "open standard",
+    "analysis",
+    "signal processing",
+    "feature extraction",
+    "machine learning",
+]
+dependencies = ["numpy>=1.20"]
+
+[project.optional-dependencies]
+tests = [
+    "coverage[toml]>=5", # pyproject.toml support
+    "pytest>=6", # pyproject.toml support
+    "pytest-benchmark",
+]
+tools = [
+    "mypy>=0.9", # pyproject.toml support
+    "ruff>=0.9",
+]
+dev = [
+    "openae[tests,tools]", # recursive dependency since pip 21.2
+]
+
+[project.urls]
+Homepage = "https://openae.io"
+Source = "https://github.com/openae-io/openae-lib"
+Issues = "https://github.com/openae-io/openae-lib/issues"
+Changelog = "https://github.com/openae-io/openae-lib/blob/main/CHANGELOG.md"
+
+[tool.coverage.run]
+branch = true
+parallel = true
+source = ["openae"]
+
+[tool.coverage.paths]
+source = ["bindings/python/src", "*/site-packages"]
+
+[tool.mypy]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-q --benchmark-columns=mean,stddev"
+testpaths = ["bindings/python/tests"]
+log_cli = true
+log_cli_level = "WARNING"
+
+[tool.ruff]
+include = ["pyproject.toml", "bindings/python/**/*.py"]
+line-length = 100
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+    "ANN", # flake8-annotations
+    "COM812", # Trailing comma missing, conflicts with ruff format
+    "D", # pydocstyle
+]
+
+[tool.ruff.lint.per-file-ignores]
+"test_*" = [
+    "INP001", # File is part of an implicit namespace package. Add an __init__.py.
+    "S101", # Use of `assert` detected
+    "PLR2004", # Magic value used in comparison
+]
+
+[tool.scikit-build]
+cmake.build-type = "Release"
+cmake.define = { "OPENAE_BUILD_PYTHON" = "ON" }
+minimum-version = "build-system.requires"
+build.verbose = true
+build-dir = "build/python/{wheel_tag}"
+wheel.packages = ["bindings/python/src/openae"]
+
+[tool.cibuildwheel]
+build-verbosity = 1
+test-command = "pytest bindings/python/tests"
+test-requires = "pytest"

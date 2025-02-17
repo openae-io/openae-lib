@@ -1,7 +1,16 @@
-/.cache
 /.idea/
+/.venv/
 /.vscode/
 /build*/
+/dist/
 /install/
 /cmake-build*/
 /CMakeUserPresets.json
+
+.benchmarks/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+__pycache__/
+*.pyd
+*.egg-info

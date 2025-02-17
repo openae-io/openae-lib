@@ -2,6 +2,7 @@
   "dependencies": [
     "benchmark",
     "catch2",
-    "xxhash"
+    "xxhash",
+    "nanobind"
   ]
 }

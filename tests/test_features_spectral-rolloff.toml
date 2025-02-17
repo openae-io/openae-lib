@@ -3,6 +3,7 @@ feature = "spectral-rolloff"
 [[tests]]
 name = "empty input"
 input.spectrum = []
+params.rolloff = 0.0
 result = 0.0
 
 [[tests]]

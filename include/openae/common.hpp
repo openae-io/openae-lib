@@ -21,10 +21,9 @@ using MemoryResource = std::pmr::memory_resource;
 
 struct Cache;
 
-std::unique_ptr<Cache, void(*)(Cache*)> make_cache();
+std::unique_ptr<Cache, void (*)(Cache*)> make_cache();
 
 struct Env {
-    LogLevel log_level = LogLevel::Info;
     Logger logger = nullptr;
     MemoryResource* mem_resource = nullptr;
     Cache* cache = nullptr;
