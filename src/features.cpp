@@ -12,7 +12,6 @@
 #include "openae/common.hpp"
 
 #include "cache.hpp"
-#include "features_meta.hpp"
 #include "hash.hpp"
 
 namespace {

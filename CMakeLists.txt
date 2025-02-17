@@ -71,7 +71,6 @@ add_library(
     openae
     src/common.cpp
     src/features.cpp
-    src/features_algorithm.cpp
 )
 add_library(openae::openae ALIAS openae)
 target_include_directories(

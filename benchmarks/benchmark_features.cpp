@@ -132,16 +132,6 @@ static void run_pool(benchmark::State& state, Func&& func, Args... args) {
     state.counters["allocated_bytes"] = static_cast<double>(new_delete_resource.allocated_bytes());
 }
 
-static void run_algorithm(benchmark::State& state, const char* identifier) {
-    openae::Env env{};
-    auto algorithm = openae::features::make_algorithm(identifier);
-    const auto input = make_random_input(1, state.range(0));
-    for (auto _ : state) {
-        auto result = algorithm->process(env, input);
-        benchmark::DoNotOptimize(result);
-    }
-}
-
 constexpr size_t vec_size = 65536;
 
 BENCHMARK_CAPTURE(run_default, peak_amplitude, openae::features::peak_amplitude)->Arg(vec_size);
@@ -164,7 +154,5 @@ BENCHMARK_CAPTURE(run_default, spectral_rolloff, openae::features::spectral_roll
 
 BENCHMARK_CAPTURE(run_monotonic, spectral_rolloff, openae::features::spectral_rolloff, 0.9f)->Arg(vec_size);
 BENCHMARK_CAPTURE(run_pool, spectral_rolloff, openae::features::spectral_rolloff, 0.9f)->Arg(vec_size);
-
-BENCHMARK_CAPTURE(run_algorithm, peak_amplitude, "peak-amplitude")->Arg(vec_size);
 
 BENCHMARK_MAIN();
