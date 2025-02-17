@@ -36,6 +36,7 @@ struct PyInput {
             .samplerate = samplerate,
             .timedata = {timedata.data(), timedata.size()},
             .spectrum = {spectrum.data(), spectrum.size()},
+            .fingerprint = {},
         };
     }
 
