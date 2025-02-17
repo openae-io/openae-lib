@@ -21,16 +21,12 @@ Following build options are available:
 - `OPENAE_BUILD_BENCHMARKS`: Build benchmarks
 - `OPENAE_BUILD_TESTS`: Build unit tests
 
-### Integrate as an embedded (in-source) dependency
+Requirements:
+- CMake 3.12 or higher
+- C++20 compiler (e.g., GCC ≥ 10, Clang ≥ 11, MSVC ≥ 19.30)
+- Vcpkg to install dependencies
 
-Add it to your project as a Git submodule (`git submodule add https://github.com/openae-io/openae-lib.git`) and link it with CMake:
-
-```cmake
-add_subdirectory(extern/openae-lib)  # the submodule directory
-target_link_libraries(myexecutable PRIVATE openae::openae)
-```
-
-### Build and install
+### Build
 
 ```shell
 # clone repository
@@ -46,4 +42,13 @@ cmake --build . --config Release  # multi-configuration generator like Visual St
 
 # run tests
 ctest --output-on-failure
+```
+
+### Integrate as an embedded (in-source) dependency
+
+Add it to your project as a Git submodule (`git submodule add https://github.com/openae-io/openae-lib.git`) and link it with CMake:
+
+```cmake
+add_subdirectory(extern/openae-lib)  # the submodule directory
+target_link_libraries(myexecutable PRIVATE openae::openae)
 ```
