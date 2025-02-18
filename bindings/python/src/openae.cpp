@@ -87,7 +87,7 @@ auto wrap_feature(R (*func)(openae::Env&, openae::features::Input, Args...)) {
     };
 }
 
-NB_MODULE(_openae, m) {
+NB_MODULE(openae, m) {
     auto m_features = m.def_submodule("features");
 
     nb::class_<PyInput>(m_features, "Input", nb::type_slots(PyInput::slots))

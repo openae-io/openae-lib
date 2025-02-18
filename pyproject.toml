@@ -97,10 +97,11 @@ ignore = [
 [tool.scikit-build]
 cmake.build-type = "Release"
 cmake.define = { "OPENAE_BUILD_PYTHON" = "ON" }
-minimum-version = "build-system.requires"
+wheel.packages = ["openae"]
 build.verbose = true
 build-dir = "build/python/{wheel_tag}"
-wheel.packages = ["bindings/python/src/openae"]
+install.components = ["bindings"]
+minimum-version = "build-system.requires"
 
 [tool.cibuildwheel]
 build-verbosity = 1
