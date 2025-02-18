@@ -3,6 +3,7 @@
 #include <functional>
 #include <memory>
 #include <memory_resource>
+#include <source_location>
 
 #include "openae/config.hpp"
 
@@ -17,7 +18,8 @@ enum class LogLevel {
     Fatal,
 };
 
-using Logger = std::function<void(LogLevel, const char*)>;
+using Logger =
+    std::function<void(LogLevel level, const char* message, std::source_location location)>;
 
 using MemoryResource = std::pmr::memory_resource;
 
@@ -31,6 +33,11 @@ struct Env {
     Cache* cache = nullptr;
 };
 
-OPENAE_EXPORT void log(Env& env, LogLevel level, const char* msg);
+OPENAE_EXPORT void log(
+    Env& env,
+    LogLevel level,
+    const char* msg,
+    std::source_location location = std::source_location::current()
+);
 
 }  // namespace openae

@@ -67,13 +67,38 @@ struct PyInput {
     };
 };
 
-openae::Env& default_env() {
+constexpr int py_log_level(openae::LogLevel level) noexcept {
+    // https://docs.python.org/3/library/logging.html#logging-levels
+    switch (level) {
+    case openae::LogLevel::Trace:
+    case openae::LogLevel::Debug:
+        return 10;
+    case openae::LogLevel::Info:
+        return 20;
+    case openae::LogLevel::Warning:
+        return 30;
+    case openae::LogLevel::Error:
+        return 40;
+    case openae::LogLevel::Fatal:
+        return 50;
+    default:
+        return 0;
+    }
+}
+
+void py_log(
+    openae::LogLevel level, const char* msg, [[maybe_unused]] std::source_location location
+) {
+    auto logger = nb::module_::import_("logging").attr("getLogger")("openae");
+    // https://docs.python.org/3/library/logging.html#logrecord-objects
+    nb::dict kwargs;
+    kwargs["extra"] = nb::dict{};
+    logger.attr("log")(py_log_level(level), msg, **kwargs);
+}
+
+openae::Env& py_env() {
     static openae::Env env{
-        .logger =
-            [](openae::LogLevel level, const char* msg) {
-                auto py_logger = nb::module_::import_("logging").attr("getLogger")("openae");
-                py_logger.attr("log")(static_cast<int>(level), msg);
-            },
+        .logger = py_log,
         .mem_resource = std::pmr::new_delete_resource(),
         .cache = nullptr,
     };
@@ -83,7 +108,7 @@ openae::Env& default_env() {
 template <typename R, typename... Args>
 auto wrap_feature(R (*func)(openae::Env&, openae::features::Input, Args...)) {
     return [func](const PyInput& input, Args&&... args) {
-        return func(default_env(), input, std::forward<Args>(args)...);
+        return func(py_env(), input, std::forward<Args>(args)...);
     };
 }
 
@@ -103,6 +128,7 @@ NB_MODULE(openae, m) {
         .def("__repr__", &PyInput::repr)
         .def("__str__", &PyInput::str);
 
+    // clang-format off
     m_features.def("clearance_factor", wrap_feature(openae::features::clearance_factor), nb::arg("input"));
     m_features.def("crest_factor", wrap_feature(openae::features::crest_factor), nb::arg("input"));
     m_features.def("energy", wrap_feature(openae::features::energy), nb::arg("input"));
@@ -120,4 +146,5 @@ NB_MODULE(openae, m) {
     m_features.def("spectral_skewness", wrap_feature(openae::features::spectral_skewness), nb::arg("input"));
     m_features.def("spectral_variance", wrap_feature(openae::features::spectral_variance), nb::arg("input"));
     m_features.def("zero_crossing_rate", wrap_feature(openae::features::zero_crossing_rate), nb::arg("input"));
+    // clang-format on
 }
