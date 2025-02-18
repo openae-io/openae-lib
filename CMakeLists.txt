@@ -14,7 +14,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
@@ -100,8 +99,9 @@ target_link_libraries(
 set_target_properties(
     openae
     PROPERTIES
-        VERIFY_INTERFACE_HEADER_SETS ON
+        CXX_VISIBILITY_PRESET hidden
         POSITION_INDEPENDENT_CODE ON
+        VERIFY_INTERFACE_HEADER_SETS ON
 )
 
 # tests
@@ -119,6 +119,7 @@ if(OPENAE_BUILD_BENCHMARKS)
     add_subdirectory(benchmarks)
 endif()
 
+# bindings
 option(OPENAE_BUILD_PYTHON "Build Python bindings" OFF)
 if(OPENAE_BUILD_PYTHON)
     add_subdirectory(bindings/python)

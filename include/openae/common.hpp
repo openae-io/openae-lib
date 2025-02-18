@@ -4,6 +4,8 @@
 #include <memory>
 #include <memory_resource>
 
+#include "openae/config.hpp"
+
 namespace openae {
 
 enum class LogLevel {
@@ -21,7 +23,7 @@ using MemoryResource = std::pmr::memory_resource;
 
 struct Cache;
 
-std::unique_ptr<Cache, void (*)(Cache*)> make_cache();
+OPENAE_EXPORT std::unique_ptr<Cache, void (*)(Cache*)> make_cache();
 
 struct Env {
     Logger logger = nullptr;
@@ -29,6 +31,6 @@ struct Env {
     Cache* cache = nullptr;
 };
 
-void log(Env& env, LogLevel level, const char* msg);
+OPENAE_EXPORT void log(Env& env, LogLevel level, const char* msg);
 
 }  // namespace openae

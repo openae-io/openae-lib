@@ -3,8 +3,14 @@
 namespace openae {
 
 #define OPENAE_VERSION "@PROJECT_VERSION@"
-#define OPENAE_VERSION_MAJOR @PROJECT_VERSION_MAJOR@
-#define OPENAE_VERSION_MINOR @PROJECT_VERSION_MINOR@
-#define OPENAE_VERSION_PATCH @PROJECT_VERSION_PATCH@
+#define OPENAE_VERSION_MAJOR @PROJECT_VERSION_MAJOR @
+#define OPENAE_VERSION_MINOR @PROJECT_VERSION_MINOR @
+#define OPENAE_VERSION_PATCH @PROJECT_VERSION_PATCH @
+
+#if defined(_WIN32)
+#define OPENAE_EXPORT __declspec(dllexport)
+#else
+#define OPENAE_EXPORT __attribute__((visibility("default")))
+#endif
 
 }  // namespace openae
