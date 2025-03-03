@@ -2,7 +2,7 @@
 
 The OpenAE library is a high-performance implementation of the [OpenAE](https://openae.io) standards for real-time acoustic emission signal processing:
 
-- [Feature extraction algorithms](https://openae.io/features/latest/)
+- [Feature extraction algorithms](https://openae.io/standards/features/)
 
 The library is implemented in C++20 and offers bindings for:
 
