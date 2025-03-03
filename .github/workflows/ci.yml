@@ -1,0 +1,69 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+jobs:
+  test:
+    name: ${{ matrix.config.name }} (${{ matrix.build_type }}, ${{ matrix.library_type }})
+    strategy:
+      fail-fast: true
+      matrix:
+        config:
+          - name: Linux GCC 14
+            os: ubuntu-24.04
+            compiler: g++-14
+
+          - name: Linux Clang 18
+            os: ubuntu-24.04
+            compiler: clang++-18
+
+          - name: macOS AppleClang 16
+            os: macos-15
+            compiler: clang++
+
+          - name: Windows Visual Studio 17
+            os: windows-2022
+            compiler: msvc
+
+        build_type:
+          - Debug
+          - Release
+
+        library_type:
+          - static
+          - shared
+
+        include:
+          - config:
+              name: Clang-Tidy
+              os: ubuntu-24.04
+              compiler: clang++
+              flags: "-DOPENAE_ENABLE_CLANG_TIDY=ON"
+            build_type: Debug
+            library_type: static
+
+    runs-on: ${{ matrix.config.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure CMake
+        run: >
+          cmake -S . -B build
+          -DCMAKE_CXX_COMPILER=${{ matrix.config.compiler }}
+          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+          -DBUILD_SHARED_LIBS=${{ matrix.library_type == 'shared' }}
+          -DOPENAE_BUILD_BENCHMARKS=ON
+          -DOPENAE_BUILD_TESTS=ON
+          -DOPENAE_BUILD_EXAMPLES=ON
+          -DOPENAE_WARNINGS_AS_ERRORS=ON
+          ${{ matrix.config.flags }}
+
+      - name: Build
+        run: |
+          cmake --build build --config ${{ matrix.build_type }} --parallel
+          cmake --build build --config ${{ matrix.build_type }} --target all_verify_interface_header_sets
+
+      - name: Run tests
+        run: ctest --test-dir build --build-config ${{ matrix.build_type }} --output-on-failure
