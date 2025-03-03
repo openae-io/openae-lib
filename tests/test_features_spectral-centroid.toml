@@ -22,7 +22,7 @@ name = "zeros with single peak"
 input.samplerate = 8.0
 input.spectrum = [0, 0, 0, 5, 0]
 # frequencies:    0  1  2  3  4
-result = 3
+result = 3.0
 
 [[tests]]
 name = "zeros with wide symmetric peak"

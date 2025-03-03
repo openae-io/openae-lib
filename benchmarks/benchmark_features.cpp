@@ -151,6 +151,7 @@ BENCHMARK_CAPTURE(run_default, spectral_variance, openae::features::spectral_var
 BENCHMARK_CAPTURE(run_default, spectral_skewness, openae::features::spectral_skewness)->Arg(vec_size);
 BENCHMARK_CAPTURE(run_default, spectral_kurtosis, openae::features::spectral_kurtosis)->Arg(vec_size);
 BENCHMARK_CAPTURE(run_default, spectral_rolloff, openae::features::spectral_rolloff, 0.9f)->Arg(vec_size);
+BENCHMARK_CAPTURE(run_default, spectral_flatness, openae::features::spectral_flatness)->Arg(vec_size);
 
 BENCHMARK_CAPTURE(run_monotonic, spectral_rolloff, openae::features::spectral_rolloff, 0.9f)->Arg(vec_size);
 BENCHMARK_CAPTURE(run_pool, spectral_rolloff, openae::features::spectral_rolloff, 0.9f)->Arg(vec_size);

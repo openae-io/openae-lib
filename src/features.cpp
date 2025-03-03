@@ -42,8 +42,20 @@ constexpr auto sum(const Range& range) {
 }
 
 template <std::ranges::input_range Range>
-constexpr auto mean(const Range& range) {
-    return sum(range) / std::ranges::size(range);
+constexpr float mean(const Range& range) {
+    return static_cast<float>(sum(range)) / std::ranges::size(range);
+}
+
+template <std::ranges::input_range Range>
+constexpr float geometric_mean(const Range& range) {
+    float log_sum = 0.0f;
+    for (const auto& value : range) {
+        if (value == 0) {
+            return 0.0f;
+        }
+        log_sum += std::log(value);
+    }
+    return std::exp(log_sum / std::ranges::size(range));
 }
 
 template <std::ranges::input_range Range>
@@ -296,6 +308,11 @@ float spectral_rolloff(Env& env, Input input, float rolloff) {
     const auto it = std::upper_bound(acc.begin(), acc.end(), threshold);
     const auto bin = std::distance(acc.begin(), it);
     return bin_to_hz(input.samplerate, input.spectrum.size(), bin);
+}
+
+float spectral_flatness([[maybe_unused]] Env& env, Input input) {
+    const auto power_spectrum = power_spectrum_view(input.spectrum);
+    return geometric_mean(power_spectrum) / mean(power_spectrum);
 }
 
 }  // namespace openae::features

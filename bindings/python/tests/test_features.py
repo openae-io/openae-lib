@@ -102,6 +102,10 @@ def gen_parameter_sets(func, filename: str):
             "test_features_spectral-centroid.toml",
         ),
         *gen_parameter_sets(
+            openae.features.spectral_flatness,
+            "test_features_spectral-flatness.toml",
+        ),
+        *gen_parameter_sets(
             openae.features.spectral_kurtosis,
             "test_features_spectral-kurtosis.toml",
         ),
