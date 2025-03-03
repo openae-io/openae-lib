@@ -36,22 +36,22 @@ constexpr T pow(T base) noexcept {
     }
 }
 
-template <std::ranges::input_range Range>
-constexpr auto sum(const Range& range) {
-    return std::reduce(std::ranges::begin(range), std::ranges::end(range));
+template <typename T, std::ranges::input_range Range>
+constexpr T sum(const Range& range) {
+    return std::reduce(std::ranges::begin(range), std::ranges::end(range), T{0});
 }
 
-template <std::ranges::input_range Range>
-constexpr float mean(const Range& range) {
-    return static_cast<float>(sum(range)) / std::ranges::size(range);
+template <std::floating_point T, std::ranges::input_range Range>
+constexpr T mean(const Range& range) {
+    return sum<T>(range) / std::ranges::size(range);
 }
 
-template <std::ranges::input_range Range>
-constexpr float geometric_mean(const Range& range) {
-    float log_sum = 0.0f;
+template <std::floating_point T, std::ranges::input_range Range>
+constexpr T geometric_mean(const Range& range) {
+    T log_sum{0};
     for (const auto& value : range) {
         if (value == 0) {
-            return 0.0f;
+            return T{0};
         }
         log_sum += std::log(value);
     }
@@ -141,11 +141,11 @@ float peak_amplitude([[maybe_unused]] Env& env, Input input) {
 }
 
 float energy([[maybe_unused]] Env& env, Input input) {
-    return sum(views::square(input.timedata)) / input.samplerate;
+    return sum<float>(views::square(input.timedata)) / input.samplerate;
 }
 
 float rms([[maybe_unused]] Env& env, Input input) {
-    return std::sqrt(mean(views::square(input.timedata)));
+    return std::sqrt(mean<float>(views::square(input.timedata)));
 }
 
 float crest_factor([[maybe_unused]] Env& env, Input input) {
@@ -153,15 +153,16 @@ float crest_factor([[maybe_unused]] Env& env, Input input) {
 }
 
 float impulse_factor([[maybe_unused]] Env& env, Input input) {
-    return peak_amplitude(env, input) / mean(views::abs(input.timedata));
+    return peak_amplitude(env, input) / mean<float>(views::abs(input.timedata));
 }
 
 float clearance_factor([[maybe_unused]] Env& env, Input input) {
-    return peak_amplitude(env, input) / pow<2>(mean(views::sqrt(views::abs(input.timedata))));
+    return peak_amplitude(env, input) /
+        pow<2>(mean<float>(views::sqrt(views::abs(input.timedata))));
 }
 
 float shape_factor([[maybe_unused]] Env& env, Input input) {
-    return rms(env, input) / mean(views::abs(input.timedata));
+    return rms(env, input) / mean<float>(views::abs(input.timedata));
 }
 
 static size_t zero_crossings(Timedata y) {
@@ -184,7 +185,7 @@ float zero_crossing_rate([[maybe_unused]] Env& env, Input input) {
 
 template <size_t N>
 static float central_moment(Timedata y, float y_mean) {
-    return mean(std::views::transform(y, [y_mean](auto v) { return pow<N>(v - y_mean); }));
+    return mean<float>(std::views::transform(y, [y_mean](auto v) { return pow<N>(v - y_mean); }));
 }
 
 template <size_t N>
@@ -192,7 +193,7 @@ static float standardized_moment(Timedata y) {
     if (y.size() < N) {
         return quite_nan<float>();
     }
-    const auto y_mean = mean(y);
+    const auto y_mean = mean<float>(y);
     return central_moment<N>(y, y_mean) / pow<N>(std::sqrt(central_moment<2>(y, y_mean)));
 }
 
@@ -230,7 +231,7 @@ float partial_power([[maybe_unused]] Env& env, Input input, float fmin, float fm
         power_spectrum.begin() + hz_to_bin(input.samplerate, power_spectrum.size(), fmin),
         power_spectrum.begin() + hz_to_bin(input.samplerate, power_spectrum.size(), fmax)
     );
-    return sum(power_spectrum_range) / sum(power_spectrum);
+    return sum<float>(power_spectrum_range) / sum<float>(power_spectrum);
 }
 
 float spectral_peak_frequency([[maybe_unused]] Env& env, Input input) {
@@ -312,7 +313,7 @@ float spectral_rolloff(Env& env, Input input, float rolloff) {
 
 float spectral_flatness([[maybe_unused]] Env& env, Input input) {
     const auto power_spectrum = power_spectrum_view(input.spectrum);
-    return geometric_mean(power_spectrum) / mean(power_spectrum);
+    return geometric_mean<float>(power_spectrum) / mean<float>(power_spectrum);
 }
 
 }  // namespace openae::features
