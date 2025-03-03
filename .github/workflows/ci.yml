@@ -61,9 +61,10 @@ jobs:
           ${{ matrix.config.flags }}
 
       - name: Build
-        run: |
-          cmake --build build --config ${{ matrix.build_type }} --parallel
-          cmake --build build --config ${{ matrix.build_type }} --target all_verify_interface_header_sets
+        run: cmake --build build --config ${{ matrix.build_type }} --parallel
+
+      - name: Verify interface header sets
+        run: cmake --build build --config ${{ matrix.build_type }} --target all_verify_interface_header_sets
 
       - name: Run tests
         run: ctest --test-dir build --build-config ${{ matrix.build_type }} --output-on-failure
