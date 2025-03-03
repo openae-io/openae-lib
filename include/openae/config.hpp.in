@@ -2,6 +2,8 @@
 
 namespace openae {
 
+// NOLINTBEGIN(*macro-usage)
+
 #define OPENAE_VERSION "@PROJECT_VERSION@"
 #define OPENAE_VERSION_MAJOR @PROJECT_VERSION_MAJOR @
 #define OPENAE_VERSION_MINOR @PROJECT_VERSION_MINOR @
@@ -12,5 +14,7 @@ namespace openae {
 #else
 #define OPENAE_EXPORT __attribute__((visibility("default")))
 #endif
+
+// NOLINTEND(*macro-usage)
 
 }  // namespace openae
