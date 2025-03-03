@@ -1,14 +1,5 @@
 find_package(Catch2 REQUIRED)
-
-# toml++ vcpkg port currently relies on PkgConfig, use FetchContent instead
-# https://github.com/marzer/tomlplusplus/issues/209
-include(FetchContent)
-FetchContent_Declare(
-    tomlplusplus
-    GIT_REPOSITORY https://github.com/marzer/tomlplusplus.git
-    GIT_TAG v3.4.0
-)
-FetchContent_MakeAvailable(tomlplusplus)
+find_package(tomlplusplus REQUIRED)
 
 configure_file(test_config.hpp.in test_config.hpp @ONLY)
 
