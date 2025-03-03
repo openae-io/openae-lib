@@ -73,7 +73,7 @@ private:
     std::size_t read_index_{0};
 };
 
-template <template <typename Key, typename T> typename Storage, typename... Ts>
+template <template <typename Key, typename T, auto...> typename Storage, typename... Ts>
 class BasicCache {
 public:
     template <typename T>
@@ -136,7 +136,7 @@ struct Cache {
         );
     }
 
-    template <template <typename, typename> typename Storage>
+    template <template <typename, typename, auto...> typename Storage>
     using CacheVariant = BasicCache<Storage, bool, int, std::size_t, float, double>;
 
     std::variant<CacheVariant<RingBufferStorage> /* to be extended... */> cache;

@@ -1,15 +1,18 @@
 #include "openae/common.hpp"
 
+#include <memory>
+#include <source_location>
+
 #include "cache.hpp"
 
 namespace openae {
 
 template <typename T>
 static void delete_func(T* ptr) {
-    delete ptr;
+    delete ptr;  // NOLINT(cppcoreguidelines-owning-memory)
 }
 
-std::unique_ptr<Cache, void(*)(Cache*)> make_cache() {
+std::unique_ptr<Cache, void (*)(Cache*)> make_cache() {
     return {new Cache, &delete_func<Cache>};
 }
 

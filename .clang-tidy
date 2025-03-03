@@ -3,14 +3,19 @@ Checks: >
   bugprone*,
   cert*,
   cppcoreguidelines*,
+  -cppcoreguidelines-avoid-magic-numbers,
   clang-analyzer*,
   hicpp*,
   misc*,
+  -misc-include-cleaner,
+  -misc-use-anonymous-namespace,
   modernize*,
   -modernize-use-nodiscard,
   -modernize-use-trailing-return-type,
   performance*,
   readability*,
+  -readability-identifier-length,
+  -readability-magic-numbers,
 
 CheckOptions:
   - key: misc-non-private-member-variables-in-classes.IgnoreClassesWithAllMemberVariablesBeingPublic

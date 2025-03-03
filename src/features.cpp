@@ -2,17 +2,17 @@
 
 #include <algorithm>
 #include <cassert>
-#include <cstdint>
+#include <cmath>  // round
+#include <complex>
+#include <concepts>
+#include <cstddef>  // size_t
 #include <iterator>
 #include <limits>
 #include <numeric>  // reduce
 #include <ranges>
-#include <type_traits>
+#include <vector>
 
 #include "openae/common.hpp"
-
-#include "cache.hpp"
-#include "hash.hpp"
 
 namespace {
 
@@ -80,24 +80,24 @@ constexpr auto max_element(const Range& range) {
     }
 }
 
-constexpr float bin_to_hz(float samplerate, size_t bins, auto bin) noexcept {
+constexpr float bin_to_hz(float samplerate, std::integral auto bins, auto bin) noexcept {
     if (bins <= 1) {
         return quite_nan<float>();
     }
     // TODO: handle unexpected arguments
     // assert(static_cast<float>(bin) <= static_cast<float>(bins - 1));
-    return 0.5f * samplerate * static_cast<float>(bin) / static_cast<float>(bins - 1);
+    return 0.5F * samplerate * static_cast<float>(bin) / static_cast<float>(bins - 1);
 }
 
-constexpr size_t hz_to_bin(float samplerate, size_t bins, float frequency) noexcept {
-    if (samplerate == 0.0f || bins <= 1) {
+constexpr size_t hz_to_bin(float samplerate, std::integral auto bins, float frequency) noexcept {
+    if (samplerate == 0.0F || bins <= 1) {
         return 0;
     }
     // TODO: handle unexpected arguments
-    assert(frequency >= 0.0f);
-    assert(frequency <= 0.5f * samplerate);
-    const auto bin = static_cast<float>(bins - 1) * frequency / (0.5f * samplerate);
-    return static_cast<size_t>(bin + 0.5f);
+    assert(frequency >= 0.0F);
+    assert(frequency <= 0.5F * samplerate);
+    const auto bin = static_cast<float>(bins - 1) * frequency / (0.5F * samplerate);
+    return static_cast<size_t>(std::round(bin));
 }
 
 namespace views {
@@ -134,7 +134,7 @@ inline static std::pmr::memory_resource* mem_resource_or_default(Env& env) noexc
 
 float peak_amplitude([[maybe_unused]] Env& env, Input input) {
     if (input.timedata.empty()) {
-        return 0.0f;
+        return 0.0F;
     }
     const auto [min, max] = std::ranges::minmax(input.timedata);
     return std::max(std::abs(min), std::abs(max));
@@ -178,7 +178,7 @@ static size_t zero_crossings(Timedata y) {
 
 float zero_crossing_rate([[maybe_unused]] Env& env, Input input) {
     const auto to_rate = input.samplerate / static_cast<float>(input.timedata.size());
-    return to_rate * zero_crossings(input.timedata);
+    return to_rate * static_cast<float>(zero_crossings(input.timedata));
 }
 
 /* ----------------------------------------- Statistics ----------------------------------------- */
@@ -224,12 +224,14 @@ static auto power_spectrum_view(Spectrum spectrum) {
 }
 
 float partial_power([[maybe_unused]] Env& env, Input input, float fmin, float fmax) {
-    fmin = std::clamp(fmin, 0.0f, 0.5f * input.samplerate);
-    fmax = std::clamp(fmax, fmin, 0.5f * input.samplerate);
+    fmin = std::clamp(fmin, 0.0F, 0.5F * input.samplerate);
+    fmax = std::clamp(fmax, fmin, 0.5F * input.samplerate);
     const auto power_spectrum = power_spectrum_view(input.spectrum);
     const auto power_spectrum_range = std::ranges::subrange(
+        // NOLINTBEGIN(*narrowing-conversions)
         power_spectrum.begin() + hz_to_bin(input.samplerate, power_spectrum.size(), fmin),
         power_spectrum.begin() + hz_to_bin(input.samplerate, power_spectrum.size(), fmax)
+        // NOLINTEND(*narrowing-conversions)
     );
     return sum<float>(power_spectrum_range) / sum<float>(power_spectrum);
 }
@@ -251,14 +253,14 @@ float spectral_centroid([[maybe_unused]] Env& env, Input input) {
     }
     const auto power_spectrum = power_spectrum_view(input.spectrum);
     const auto bins = power_spectrum.size();
-    float power_sum = 0.0f;
-    float power_sum_weighted = 0.0f;
+    float power_sum = 0.0F;
+    float power_sum_weighted = 0.0F;
     for (size_t bin = 0; bin < bins; ++bin) {
-        power_sum += power_spectrum[bin];
-        power_sum_weighted += power_spectrum[bin] * static_cast<float>(bin);
+        const auto power = power_spectrum[static_cast<std::ptrdiff_t>(bin)];
+        power_sum += power;
+        power_sum_weighted += power * static_cast<float>(bin);
     }
-    const auto bin = power_sum_weighted / power_sum;
-    return bin_to_hz(input.samplerate, bins, bin);
+    return bin_to_hz(input.samplerate, bins, power_sum_weighted / power_sum);
 }
 
 template <size_t N>
@@ -266,12 +268,13 @@ static float spectral_central_moment([[maybe_unused]] Env& env, Input input, flo
     const auto power_spectrum = power_spectrum_view(input.spectrum);
     const auto bins = power_spectrum.size();
     const auto factor_bin_to_hz = bin_to_hz(input.samplerate, bins, 1);
-    float power_sum = 0.0f;
-    float power_sum_weighted = 0.0f;
+    float power_sum = 0.0F;
+    float power_sum_weighted = 0.0F;
     for (size_t bin = 0; bin < bins; ++bin) {
+        const auto power = power_spectrum[static_cast<std::ptrdiff_t>(bin)];
         const auto f = factor_bin_to_hz * static_cast<float>(bin);
-        power_sum += power_spectrum[bin];
-        power_sum_weighted += power_spectrum[bin] * pow<N>(f - f_centroid);
+        power_sum += power;
+        power_sum_weighted += power * pow<N>(f - f_centroid);
     }
     return power_sum_weighted / power_sum;
 }
@@ -297,14 +300,14 @@ float spectral_kurtosis(Env& env, Input input) {
 
 float spectral_rolloff(Env& env, Input input, float rolloff) {
     if (input.spectrum.empty()) {
-        return 0.0f;
+        return 0.0F;
     }
     const auto power_spectrum = power_spectrum_view(input.spectrum);
     std::pmr::vector<float> acc(power_spectrum.size(), mem_resource_or_default(env));
     std::partial_sum(power_spectrum.begin(), power_spectrum.end(), acc.begin());
 
     const auto total = acc.back();
-    const auto threshold = total * std::clamp(rolloff, 0.0f, 1.0f);
+    const auto threshold = total * std::clamp(rolloff, 0.0F, 1.0F);
 
     const auto it = std::upper_bound(acc.begin(), acc.end(), threshold);
     const auto bin = std::distance(acc.begin(), it);

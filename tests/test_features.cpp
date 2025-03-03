@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <filesystem>
+#include <format>
 #include <map>
 #include <stdexcept>
 #include <string>
@@ -22,7 +23,7 @@ struct OwningInput {
     std::vector<float> timedata;
     std::vector<std::complex<float>> spectrum;
 
-    operator openae::features::Input() const {
+    operator openae::features::Input() const {  // NOLINT(*explicit-conversions)
         return {
             .samplerate = samplerate,
             .timedata = timedata,
@@ -50,6 +51,8 @@ class ParseError : public std::runtime_error {
     using runtime_error::runtime_error;
 };
 
+// NOLINTBEGIN(bugprone-unchecked-optional-access)
+
 template <typename T, typename TomlType = T>
 std::vector<T> parse_array(const toml::node& node) {
     if (const auto* arr = node.as_array()) {
@@ -65,7 +68,7 @@ std::vector<T> parse_array(const toml::node& node) {
 OwningInput parse_input(const toml::node& node) {
     if (const auto* tbl = node.as_table()) {
         return OwningInput{
-            .samplerate = tbl->at_path("samplerate").value_or(0.0f),
+            .samplerate = tbl->at_path("samplerate").value_or(0.0F),
             .timedata = tbl->contains("timedata")
                 ? parse_array<float>(tbl->at("timedata"))
                 : std::vector<float>{},
@@ -112,13 +115,15 @@ std::vector<TestCase> parse_test_cases(const toml::node& node) {
     return tests;
 }
 
-TestConfig parse_test_config(std::filesystem::path path) {
+TestConfig parse_test_config(const std::filesystem::path& path) {
     const toml::table tbl = toml::parse_file(path.c_str());
     return TestConfig{
         .feature = tbl.at("feature").value<std::string>().value(),
         .tests = parse_test_cases(tbl.at("tests")),
     };
 }
+
+// NOLINTEND(bugprone-unchecked-optional-access)
 
 template <typename Tuple, typename F>
 constexpr void for_each(Tuple&& tuple, F&& f) {
@@ -136,9 +141,9 @@ R compute_feature(
     const ParameterMap& param_values
 ) {
     openae::Env env{};
-    std::tuple<Args...> args;
+    std::tuple<Args...> args;  // NOLINT(*const-correctness), false positive
     for_each(args, [&, index = size_t{0}]<typename Arg>(Arg& arg) mutable {
-        const auto param_name = param_names[index++];
+        const auto& param_name = param_names.at(index++);
         if (not param_values.contains(param_name)) {
             throw std::runtime_error(std::format("Parameter not found: {}", param_name));
         }
@@ -159,7 +164,7 @@ constexpr T cast_error(T value) {
 }
 
 template <typename R, typename... Args>
-void run_tests(
+void run_tests(  // NOLINT(readability-function-cognitive-complexity)
     std::string_view test_config_filename,
     R (*func)(openae::Env&, openae::features::Input, Args...),
     const std::array<std::string, sizeof...(Args)>& param_names
@@ -195,7 +200,8 @@ void run_tests(
     }
 }
 
-#define TEST_CASE_FEATURE(name, func, ...)                                                              \
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define TEST_CASE_FEATURE(name, func, ...)                                                         \
     TEST_CASE("Feature " name) {                                                                   \
         run_tests("test_features_" name ".toml", func, {__VA_ARGS__});                             \
     }

@@ -60,9 +60,10 @@ struct PyInput {
         return 0;
     }
 
+    // NOLINTNEXTLINE(*c-arrays)
     inline static PyType_Slot slots[] = {
-        {Py_tp_traverse, reinterpret_cast<void*>(tp_traverse)},
-        {Py_tp_clear, reinterpret_cast<void*>(tp_clear)},
+        {Py_tp_traverse, reinterpret_cast<void*>(tp_traverse)},  // NOLINT(*reinterpret-cast)
+        {Py_tp_clear, reinterpret_cast<void*>(tp_clear)},  // NOLINT(*reinterpret-cast)
         {0, nullptr},
     };
 };
@@ -91,7 +92,7 @@ void py_log(
 ) {
     auto logger = nb::module_::import_("logging").attr("getLogger")("openae");
     // https://docs.python.org/3/library/logging.html#logrecord-objects
-    nb::dict kwargs;
+    nb::dict kwargs;  // NOLINT(*const-correctness), false positive
     kwargs["extra"] = nb::dict{};
     logger.attr("log")(py_log_level(level), msg, **kwargs);
 }
@@ -115,7 +116,9 @@ auto wrap_feature(R (*func)(openae::Env&, openae::features::Input, Args...)) {
 NB_MODULE(openae, m) {
     auto m_features = m.def_submodule("features");
 
-    nb::class_<PyInput>(m_features, "Input", nb::type_slots(PyInput::slots))
+    nb::class_<PyInput>(
+        m_features, "Input", nb::type_slots(static_cast<PyType_Slot*>(PyInput::slots))
+    )
         .def(
             nb::init<float, const PyTimedata&, const PySpectrum&>(),
             nb::arg("samplerate"),

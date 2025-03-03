@@ -17,18 +17,18 @@ TEST_CASE("RingBufferStorage") {
     CHECK(storage.size() == 0);
 
     SECTION("insert with same key") {
-        CHECK(storage.insert(1, 1.1f) == 1.1f);
+        CHECK(storage.insert(1, 1.1F) == 1.1F);
         CHECK(storage.size() == 1);
 
-        CHECK(storage.insert(1, 2.2f) == 2.2f);
+        CHECK(storage.insert(1, 2.2F) == 2.2F);
         CHECK(storage.size() == 1);
     }
 
     SECTION("insert with different keys") {
-        CHECK(storage.insert(1, 1.1f) == 1.1f);
+        CHECK(storage.insert(1, 1.1F) == 1.1F);
         CHECK(storage.size() == 1);
 
-        CHECK(storage.insert(2, 2.2f) == 2.2f);
+        CHECK(storage.insert(2, 2.2F) == 2.2F);
         CHECK(storage.size() == 2);
     }
 
@@ -51,9 +51,9 @@ TEST_CASE("RingBufferStorage") {
     SECTION("find") {
         CHECK(storage.find(1) == nullptr);
 
-        CHECK(storage.insert(1, 1.1f) == 1.1f);
+        CHECK(storage.insert(1, 1.1F) == 1.1F);
         CHECK(storage.find(1) != nullptr);
-        CHECK(*storage.find(1) == 1.1f);
+        CHECK(*storage.find(1) == 1.1F);
     }
 }
 

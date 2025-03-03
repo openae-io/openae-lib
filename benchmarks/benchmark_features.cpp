@@ -21,16 +21,16 @@ public:
     }
 
 protected:
-    void* do_allocate(size_t bytes, size_t alignment) {
+    void* do_allocate(size_t bytes, size_t alignment) override {
         allocated_bytes_ += bytes;
         return upstream_->allocate(bytes, alignment);
     }
 
-    void do_deallocate(void* p, size_t bytes, size_t alignment) {
+    void do_deallocate(void* p, size_t bytes, size_t alignment) override {
         upstream_->deallocate(p, bytes, alignment);
     }
 
-    bool do_is_equal(const std::pmr::memory_resource& other) const noexcept {
+    bool do_is_equal(const std::pmr::memory_resource& other) const noexcept override {
         return upstream_->is_equal(other);
     }
 
@@ -44,7 +44,7 @@ struct OwningInput {
     std::vector<float> timedata;
     std::vector<std::complex<float>> spectrum;
 
-    operator openae::features::Input() const {
+    operator openae::features::Input() const {  // NOLINT(*explicit-conversions)
         return {
             .samplerate = samplerate,
             .timedata = timedata,
@@ -63,7 +63,7 @@ static OwningInput make_random_input(float samplerate, size_t size) {
 }
 
 template <typename Func, typename... Args>
-static void run_default(benchmark::State& state, Func&& func, Args... args) {
+static void run_default(benchmark::State& state, Func func, Args... args) {
     AllocationCounter new_delete_resource{std::pmr::new_delete_resource()};
     openae::Env env{};
     env.mem_resource = &new_delete_resource;
@@ -78,7 +78,7 @@ static void run_default(benchmark::State& state, Func&& func, Args... args) {
 }
 
 template <typename Func, typename... Args>
-static void run_cached(benchmark::State& state, Func&& func, Args... args) {
+static void run_cached(benchmark::State& state, Func func, Args... args) {
     AllocationCounter new_delete_resource{std::pmr::new_delete_resource()};
     auto cache = openae::make_cache();
     openae::Env env{};
@@ -95,14 +95,16 @@ static void run_cached(benchmark::State& state, Func&& func, Args... args) {
 }
 
 template <typename Func, typename... Args>
-static void run_monotonic(benchmark::State& state, Func&& func, Args... args) {
+static void run_monotonic(benchmark::State& state, Func func, Args... args) {
     std::vector<std::byte> buffer(buffer_size);
     AllocationCounter new_delete_resource{std::pmr::new_delete_resource()};
 
     const auto input = make_random_input(1, state.range(0));
     for (auto _ : state) {
         state.PauseTiming();
-        std::pmr::monotonic_buffer_resource buffer_resource{buffer.data(), buffer.size(), &new_delete_resource};
+        std::pmr::monotonic_buffer_resource buffer_resource{
+            buffer.data(), buffer.size(), &new_delete_resource
+        };
         openae::Env env{};
         env.mem_resource = &buffer_resource;
         state.ResumeTiming();
@@ -115,10 +117,12 @@ static void run_monotonic(benchmark::State& state, Func&& func, Args... args) {
 }
 
 template <typename Func, typename... Args>
-static void run_pool(benchmark::State& state, Func&& func, Args... args) {
+static void run_pool(benchmark::State& state, Func func, Args... args) {
     std::vector<std::byte> buffer(buffer_size);
     AllocationCounter new_delete_resource{std::pmr::new_delete_resource()};
-    std::pmr::monotonic_buffer_resource buffer_resource{buffer.data(), buffer.size(), &new_delete_resource};
+    std::pmr::monotonic_buffer_resource buffer_resource{
+        buffer.data(), buffer.size(), &new_delete_resource
+    };
     std::pmr::unsynchronized_pool_resource pool_resource{&buffer_resource};
     openae::Env env{};
     env.mem_resource = &pool_resource;
@@ -144,16 +148,16 @@ BENCHMARK_CAPTURE(run_default, shape_factor, openae::features::shape_factor)->Ar
 BENCHMARK_CAPTURE(run_default, skewness, openae::features::skewness)->Arg(vec_size);
 BENCHMARK_CAPTURE(run_default, kurtosis, openae::features::kurtosis)->Arg(vec_size);
 BENCHMARK_CAPTURE(run_default, zero_crossing_rate, openae::features::zero_crossing_rate)->Arg(vec_size);
-BENCHMARK_CAPTURE(run_default, partial_power, openae::features::partial_power, 0.1f, 0.2f)->Arg(vec_size);
+BENCHMARK_CAPTURE(run_default, partial_power, openae::features::partial_power, 0.1F, 0.2F)->Arg(vec_size);
 BENCHMARK_CAPTURE(run_default, spectral_peak_frequency, openae::features::spectral_peak_frequency)->Arg(vec_size);
 BENCHMARK_CAPTURE(run_default, spectral_centroid, openae::features::spectral_centroid)->Arg(vec_size);
 BENCHMARK_CAPTURE(run_default, spectral_variance, openae::features::spectral_variance)->Arg(vec_size);
 BENCHMARK_CAPTURE(run_default, spectral_skewness, openae::features::spectral_skewness)->Arg(vec_size);
 BENCHMARK_CAPTURE(run_default, spectral_kurtosis, openae::features::spectral_kurtosis)->Arg(vec_size);
-BENCHMARK_CAPTURE(run_default, spectral_rolloff, openae::features::spectral_rolloff, 0.9f)->Arg(vec_size);
+BENCHMARK_CAPTURE(run_default, spectral_rolloff, openae::features::spectral_rolloff, 0.9F)->Arg(vec_size);
 BENCHMARK_CAPTURE(run_default, spectral_flatness, openae::features::spectral_flatness)->Arg(vec_size);
 
-BENCHMARK_CAPTURE(run_monotonic, spectral_rolloff, openae::features::spectral_rolloff, 0.9f)->Arg(vec_size);
-BENCHMARK_CAPTURE(run_pool, spectral_rolloff, openae::features::spectral_rolloff, 0.9f)->Arg(vec_size);
+BENCHMARK_CAPTURE(run_monotonic, spectral_rolloff, openae::features::spectral_rolloff, 0.9F)->Arg(vec_size);
+BENCHMARK_CAPTURE(run_pool, spectral_rolloff, openae::features::spectral_rolloff, 0.9F)->Arg(vec_size);
 
 BENCHMARK_MAIN();

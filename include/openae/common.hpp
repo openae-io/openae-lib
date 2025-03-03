@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 #include <functional>
 #include <memory>
 #include <memory_resource>
@@ -9,7 +10,7 @@
 
 namespace openae {
 
-enum class LogLevel {
+enum class LogLevel : std::uint8_t {
     Trace = 0,
     Debug,
     Info,
