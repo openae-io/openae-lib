@@ -11,6 +11,7 @@ if (NOT xxHash_FOUND)
         GIT_TAG        v0.8.3
         SOURCE_SUBDIR  cmake_unofficial
         EXCLUDE_FROM_ALL
+        SYSTEM
     )
     FetchContent_MakeAvailable(xxHash)
 endif()

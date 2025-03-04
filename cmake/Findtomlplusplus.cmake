@@ -9,6 +9,7 @@ if (NOT tomlplusplus_FOUND)
         GIT_REPOSITORY https://github.com/marzer/tomlplusplus.git
         GIT_TAG        v3.4.0
         EXCLUDE_FROM_ALL
+        SYSTEM
     )
     FetchContent_MakeAvailable(tomlplusplus)
 endif()

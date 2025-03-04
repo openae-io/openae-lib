@@ -11,6 +11,8 @@ if (NOT benchmark_FOUND)
         GIT_REPOSITORY https://github.com/google/benchmark.git
         GIT_TAG        v1.9.1
         EXCLUDE_FROM_ALL
+        SYSTEM
     )
     FetchContent_MakeAvailable(benchmark)
+    set_target_properties(benchmark PROPERTIES CXX_CLANG_TIDY "")
 endif()
