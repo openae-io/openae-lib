@@ -6,11 +6,11 @@ The OpenAE library is a high-performance implementation of the [OpenAE](https://
 
 The library is implemented in C++20 and offers bindings for:
 
-- [x] Python
-- [ ] MATLAB
-- [ ] C
-- [ ] Web Assembly
-- [ ] Node.js
+- [x] Python 
+- [ ] MATLAB 🚧
+- [ ] C 🚧
+- [ ] Web Assembly 🚧
+- [ ] Node.js 🚧
 
 ## 🚀 Getting started
 
