@@ -24,7 +24,6 @@ Following build options are available:
 Requirements:
 - CMake 3.23 or higher
 - C++20 compiler (e.g., GCC ≥ 10, Clang ≥ 11, MSVC ≥ 19.30)
-- Vcpkg to install dependencies
 
 ### Build
 
