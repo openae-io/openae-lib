@@ -1,5 +1,9 @@
 [build-system]
-requires = ["scikit-build-core>=0.10", "nanobind>=2.5"]
+requires = [
+    "scikit-build-core>=0.10",
+    "nanobind>=2.5",
+    "typing_extensions", # required by nanobind stubgen.py on Python <3.11
+]
 build-backend = "scikit_build_core.build"
 
 [project]
