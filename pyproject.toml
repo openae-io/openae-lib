@@ -111,7 +111,7 @@ minimum-version = "build-system.requires"
 [tool.cibuildwheel]
 build-verbosity = 1
 test-command = "pytest {project}/bindings/python/tests"
-test-requires = "pytest"
+test-requires = ["pytest", "pytest-benchmark"]
 # manylinux_2_28 with GCC 14
 manylinux-x86_64-image = "manylinux_2_28"
 manylinux-i686-image = "manylinux_2_28"
