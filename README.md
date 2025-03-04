@@ -22,7 +22,7 @@ Following build options are available:
 - `OPENAE_BUILD_TESTS`: Build unit tests
 
 Requirements:
-- CMake 3.12 or higher
+- CMake 3.23 or higher
 - C++20 compiler (e.g., GCC ≥ 10, Clang ≥ 11, MSVC ≥ 19.30)
 - Vcpkg to install dependencies
 
