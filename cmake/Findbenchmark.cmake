@@ -14,4 +14,5 @@ if (NOT benchmark_FOUND)
         SYSTEM
     )
     FetchContent_MakeAvailable(benchmark)
+    set_target_properties(benchmark PROPERTIES CXX_CLANG_TIDY "")
 endif()
