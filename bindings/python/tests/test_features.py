@@ -1,12 +1,17 @@
 from __future__ import annotations
 
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 
 import numpy as np
 import openae
 import pytest
-import tomllib
+
+if sys.version_info >= (3, 11):
+    from tomllib import loads as toml_loads
+else:
+    from tomli import loads as toml_loads
 
 HERE = Path(__file__).parent
 PROJECT_DIR = HERE.parent.parent.parent
@@ -29,7 +34,7 @@ class _TestConfig:
 
 def parse_test_config(filename: str):
     filepath = TESTS_DIR / filename
-    obj = tomllib.loads(filepath.read_text())
+    obj = toml_loads(filepath.read_text())
     return _TestConfig(
         feature=obj["feature"],
         tests=[

@@ -13,12 +13,14 @@ description = "Implementation of the OpenAE standards for real-time acoustic emi
 authors = [{ name = "Lukas Berbuer", email = "lukas.berbuer@vallen.de" }]
 readme = "README.md"
 license = { text = "MIT License" }
-requires-python = ">=3.10"
+requires-python = ">=3.8"
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Science/Research",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -44,6 +46,7 @@ tests = [
     "coverage[toml]>=5", # pyproject.toml support
     "pytest>=6", # pyproject.toml support
     "pytest-benchmark",
+    "tomli; python_version < '3.11'",
 ]
 tools = [
     "mypy>=0.9", # pyproject.toml support
