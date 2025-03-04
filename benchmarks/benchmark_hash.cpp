@@ -9,17 +9,17 @@
 #include "random.hpp"
 
 static void benchmark_sum(benchmark::State& state) {
-    const auto vec = make_random_vector<float>(state.range(), -1.0, 1.0);
-    for (auto _ : state) {
-        auto sum = std::accumulate(vec.begin(), vec.end(), 0.0f);
+    const auto vec = make_random_vector<float>(state.range(), -1.0F, 1.0F);
+    for ([[maybe_unused]] auto _ : state) {
+        auto sum = std::accumulate(vec.begin(), vec.end(), 0.0F);
         benchmark::DoNotOptimize(sum);
     }
     state.SetItemsProcessed(state.iterations() * state.range(0));
 }
 
 static void benchmark_std_hash(benchmark::State& state) {
-    const auto vec = make_random_vector<float>(state.range(), -1.0, 1.0);
-    for (auto _ : state) {
+    const auto vec = make_random_vector<float>(state.range(), -1.0F, 1.0F);
+    for ([[maybe_unused]] auto _ : state) {
         size_t hash = vec.size();
         for (auto value : vec) {
             hash ^= std::hash<float>{}(value);
@@ -31,8 +31,8 @@ static void benchmark_std_hash(benchmark::State& state) {
 
 template <typename F>
 static void benchmark_xxhash(benchmark::State& state, F hash_func) {
-    const auto vec = make_random_vector<float>(state.range(), -1.0, 1.0);
-    for (auto _ : state) {
+    const auto vec = make_random_vector<float>(state.range(), -1.0F, 1.0F);
+    for ([[maybe_unused]] auto _ : state) {
         auto hash = hash_func(vec.data(), vec.size() * sizeof(float), 0 /* seed */);
         benchmark::DoNotOptimize(hash);
     }

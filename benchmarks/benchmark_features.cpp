@@ -69,7 +69,7 @@ static void run_default(benchmark::State& state, Func func, Args... args) {
     env.mem_resource = &new_delete_resource;
 
     const auto input = make_random_input(1, state.range(0));
-    for (auto _ : state) {
+    for ([[maybe_unused]] auto _ : state) {
         auto result = func(env, input, args...);
         benchmark::DoNotOptimize(result);
     }
@@ -86,7 +86,7 @@ static void run_cached(benchmark::State& state, Func func, Args... args) {
     env.cache = cache.get();
 
     const auto input = make_random_input(1, state.range(0));
-    for (auto _ : state) {
+    for ([[maybe_unused]] auto _ : state) {
         auto result = func(env, input, args...);
         benchmark::DoNotOptimize(result);
     }
@@ -100,7 +100,7 @@ static void run_monotonic(benchmark::State& state, Func func, Args... args) {
     AllocationCounter new_delete_resource{std::pmr::new_delete_resource()};
 
     const auto input = make_random_input(1, state.range(0));
-    for (auto _ : state) {
+    for ([[maybe_unused]] auto _ : state) {
         state.PauseTiming();
         std::pmr::monotonic_buffer_resource buffer_resource{
             buffer.data(), buffer.size(), &new_delete_resource
@@ -128,7 +128,7 @@ static void run_pool(benchmark::State& state, Func func, Args... args) {
     env.mem_resource = &pool_resource;
 
     const auto input = make_random_input(1, state.range(0));
-    for (auto _ : state) {
+    for ([[maybe_unused]] auto _ : state) {
         auto result = func(env, input, args...);
         benchmark::DoNotOptimize(result);
     }
