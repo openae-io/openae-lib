@@ -32,7 +32,7 @@ nanobind_add_stub(
     MODULE openae
     OUTPUT stub/openae/__init__.pyi
     MARKER_FILE stub/openae/py.typed
-    PYTHON_PATH $<TARGET_FILE_DIR:openae>
+    PYTHON_PATH $<TARGET_FILE_DIR:openae_bindings_python>
     DEPENDS openae_bindings_python
 )
 
@@ -40,7 +40,7 @@ nanobind_add_stub(
     openae_bindings_python_stub_features
     MODULE openae.features
     OUTPUT stub/openae/features.pyi
-    PYTHON_PATH $<TARGET_FILE_DIR:openae>
+    PYTHON_PATH $<TARGET_FILE_DIR:openae_bindings_python>
     DEPENDS openae_bindings_python
 )
 
