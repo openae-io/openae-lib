@@ -22,9 +22,7 @@ struct PyInput {
     PySpectrum spectrum;
 
     std::string repr() const {
-        return std::format(
-            "Input(samplerate={}, timedata={}, spectrum={})", samplerate, "...", "..."
-        );
+        return std::format("Input(samplerate={}, timedata=..., spectrum=...)", samplerate);
     }
 
     std::string str() const {
