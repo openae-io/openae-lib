@@ -118,7 +118,7 @@ build = [
     "cp3*-win_amd64",
 ]
 skip = []
-build-verbosity = 3
+build-verbosity = 1
 test-command = "pytest {project}/bindings/python/tests"
 test-requires = ["pytest", "pytest-benchmark"]
 # select images with C++ 20 support: https://github.com/pypa/manylinux
