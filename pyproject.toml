@@ -115,8 +115,11 @@ build = [
     "cp3*-manylinux_aarch64",
     "cp3*-macosx_x86_64",
     "cp3*-macosx_arm64",
-    "cp3*-macosx_universal2",
     "cp3*-win_amd64",
+    "cp3*-win_arm64",
+]
+skip = [
+    "cp38-macosx_arm64", # https://cibuildwheel.pypa.io/en/stable/faq/#macos-building-cpython-38-wheels-on-arm64
 ]
 build-verbosity = 1
 test-command = "pytest {project}/bindings/python/tests"

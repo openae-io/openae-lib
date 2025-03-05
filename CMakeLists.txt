@@ -8,6 +8,9 @@ project(
     LANGUAGES CXX
 )
 
+message(STATUS "Host: ${CMAKE_HOST_SYSTEM_PROCESSOR}")
+message(STATUS "Target: ${CMAKE_SYSTEM_PROCESSOR}")
+
 # set c++ standard explicitly, compile feature "cxx_std_20" does not set -std=c++20 compile flag
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
