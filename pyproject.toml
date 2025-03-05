@@ -1,5 +1,9 @@
 [build-system]
-requires = ["scikit-build-core>=0.10", "nanobind>=2.5"]
+requires = [
+    "scikit-build-core>=0.10",
+    "nanobind>=2.5",
+    "typing_extensions", # required by nanobind stubgen.py on Python <3.11
+]
 build-backend = "scikit_build_core.build"
 
 [project]
@@ -42,6 +46,7 @@ tests = [
     "coverage[toml]>=5", # pyproject.toml support
     "pytest>=6", # pyproject.toml support
     "pytest-benchmark",
+    "tomli; python_version < '3.11'",
 ]
 tools = [
     "mypy>=0.9", # pyproject.toml support
@@ -96,7 +101,7 @@ ignore = [
 
 [tool.scikit-build]
 cmake.build-type = "Release"
-cmake.define = { "OPENAE_BUILD_PYTHON" = "ON" }
+cmake.define = { "BUILD_SHARED_LIBS" = "OFF", "OPENAE_BUILD_PYTHON" = "ON" }
 wheel.packages = ["openae"]
 build.verbose = true
 build-dir = "build/python/{wheel_tag}"
@@ -104,6 +109,24 @@ install.components = ["bindings"]
 minimum-version = "build-system.requires"
 
 [tool.cibuildwheel]
+build = [
+    # https://cibuildwheel.pypa.io/en/stable/options/#build-skip
+    "cp3*-manylinux_x86_64",
+    "cp3*-manylinux_aarch64",
+    # "cp3*-macosx_x86_64",
+    "cp3*-macosx_arm64",
+    "cp3*-win_amd64",
+]
+skip = [
+    "cp38-macosx_arm64", # https://cibuildwheel.pypa.io/en/stable/faq/#macos-building-cpython-38-wheels-on-arm64
+]
 build-verbosity = 1
-test-command = "pytest bindings/python/tests"
-test-requires = "pytest"
+test-command = "pytest {project}/bindings/python/tests"
+test-requires = ["pytest", "pytest-benchmark"]
+# select images with C++ 20 support: https://github.com/pypa/manylinux
+# manylinux_2_28 with GCC 14
+manylinux-x86_64-image = "manylinux_2_28"
+manylinux-aarch64-image = "manylinux_2_28"
+# musllinux_1_2 with GCC 14
+musllinux-x86_64-image = "musllinux_1_2"
+musllinux-aarch64-image = "musllinux_1_2"

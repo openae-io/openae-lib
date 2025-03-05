@@ -19,14 +19,20 @@ target_link_libraries(
         openae
         openae_project_options
 )
-set_target_properties(openae_bindings_python PROPERTIES OUTPUT_NAME "openae")
+set_target_properties(
+    openae_bindings_python
+    PROPERTIES
+        OUTPUT_NAME openae
+        LIBRARY_OUTPUT_DIRECTORY "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/python"
+        ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/python"
+)
 
 nanobind_add_stub(
     openae_bindings_python_stub_common
     MODULE openae
     OUTPUT stub/openae/__init__.pyi
     MARKER_FILE stub/openae/py.typed
-    PYTHON_PATH $<TARGET_FILE_DIR:openae>
+    PYTHON_PATH $<TARGET_FILE_DIR:openae_bindings_python>
     DEPENDS openae_bindings_python
 )
 
@@ -34,7 +40,7 @@ nanobind_add_stub(
     openae_bindings_python_stub_features
     MODULE openae.features
     OUTPUT stub/openae/features.pyi
-    PYTHON_PATH $<TARGET_FILE_DIR:openae>
+    PYTHON_PATH $<TARGET_FILE_DIR:openae_bindings_python>
     DEPENDS openae_bindings_python
 )
 

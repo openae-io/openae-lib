@@ -1,0 +1,60 @@
+name: Python
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  tests:
+    name: Run tests on Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Build and install
+        run: pip install --verbose .[tests]
+      - name: Run tests with pytest
+        run: pytest
+
+  build_wheels:
+    name: Build wheels on ${{ matrix.config.os }}
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - os: ubuntu-24.04 # using manylinux/musllinux images
+          - os: ubuntu-24.04-arm # using manylinux/musllinux images
+          - os: windows-latest
+          - os: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build wheels
+        env:
+          # CIBW_ARCHS_MACOS: "x86_64 arm64" # https://cibuildwheel.pypa.io/en/stable/faq/#cross-compiling
+          MACOSX_DEPLOYMENT_TARGET: "13.3" # https://cibuildwheel.pypa.io/en/stable/cpp_standards/#macos-and-deployment-target-versions
+        uses: pypa/cibuildwheel@v2.23.0
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cibw-wheels-${{ matrix.config.os }}-${{ strategy.job-index }}
+          path: ./wheelhouse/*.whl
+
+  build_sdist:
+    name: Build source distribution
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build sdist
+        run: pipx run build --sdist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cibw-sdist
+          path: dist/*.tar.gz
