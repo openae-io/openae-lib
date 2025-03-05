@@ -1,10 +1,10 @@
 name: Python
 
 on:
-    push:
-      branches: [main]
-    pull_request:
-    workflow_dispatch:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
 
 jobs:
   tests:
@@ -25,15 +25,28 @@ jobs:
         run: pytest
 
   build_wheels:
-    name: Build wheels on ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
+    name: Build wheels on ${{ matrix.config.os }}
+    runs-on: ${{ matrix.config.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-24.04, ubuntu-24.04-arm, windows-latest, macos-14, macos-14-large]
+        config:
+          # select compiler with C++20 support
+          - os: ubuntu-24.04 # using manylinux/musllinux images
+          - os: ubuntu-24.04-arm # using manylinux/musllinux images
+          - os: windows-latest
+          - os: macos-13 # x86_64
+            CC: gcc-14
+            CXX: g++-14
+          - os: macos-14 # arm64
+            CC: gcc-14
+            CXX: g++-14
     steps:
       - uses: actions/checkout@v4
       - name: Build wheels
+        env:
+          CC: ${{ matrix.config.CC }}
+          CXX: ${{ matrix.config.CXX }}
         uses: pypa/cibuildwheel@v2.23.0
       - uses: actions/upload-artifact@v4
         with:
