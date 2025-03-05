@@ -109,6 +109,8 @@ install.components = ["bindings"]
 minimum-version = "build-system.requires"
 
 [tool.cibuildwheel]
+build = "*"
+skip = "pp*"
 build-verbosity = 1
 test-command = "pytest {project}/bindings/python/tests"
 test-requires = ["pytest", "pytest-benchmark"]
