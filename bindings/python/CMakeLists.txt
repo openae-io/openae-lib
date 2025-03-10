@@ -23,8 +23,8 @@ set_target_properties(
     openae_bindings_python
     PROPERTIES
         OUTPUT_NAME openae
-        LIBRARY_OUTPUT_DIRECTORY "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/python"
-        ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/python"
+        LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+        ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
 )
 
 nanobind_add_stub(
@@ -51,7 +51,7 @@ if(SKBUILD)
         COMPONENT bindings
     )
     install(
-        DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/stub/
+        DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/stub/"
         DESTINATION .
         COMPONENT bindings
     )
