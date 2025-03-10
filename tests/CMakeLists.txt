@@ -1,5 +1,25 @@
-find_package(Catch2 REQUIRED)
-find_package(tomlplusplus REQUIRED)
+include(FetchContent)
+
+option(CATCH_INSTALL_DOCS "Install documentation alongside library" OFF)
+FetchContent_Declare(
+    Catch2
+    GIT_REPOSITORY    https://github.com/catchorg/Catch2.git
+    GIT_TAG           v3.8.0
+    FIND_PACKAGE_ARGS 3.8.0
+)
+FetchContent_MakeAvailable(Catch2)
+if(TARGET Catch2)
+    set_target_properties(Catch2 PROPERTIES CXX_CLANG_TIDY "")
+    set_target_properties(Catch2WithMain PROPERTIES CXX_CLANG_TIDY "")
+endif()
+
+FetchContent_Declare(
+    tomlplusplus
+    GIT_REPOSITORY    https://github.com/marzer/tomlplusplus.git
+    GIT_TAG           v3.4.0
+    FIND_PACKAGE_ARGS 3.4.0
+)
+FetchContent_MakeAvailable(tomlplusplus)
 
 configure_file(test_config.hpp.in test_config.hpp @ONLY)
 

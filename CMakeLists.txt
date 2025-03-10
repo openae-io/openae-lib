@@ -61,7 +61,17 @@ else()
     target_compile_options(openae_project_options INTERFACE ${warnings})
 endif()
 
-find_package(xxHash REQUIRED)
+include(FetchContent)
+option(XXHASH_BUILD_XXHSUM "Build the xxhsum binary" OFF)
+FetchContent_Declare(
+    xxHash
+    GIT_REPOSITORY    https://github.com/Cyan4973/xxHash.git
+    GIT_TAG           v0.8.3
+    SOURCE_SUBDIR     cmake_unofficial
+    EXCLUDE_FROM_ALL
+    FIND_PACKAGE_ARGS 0.8.3
+)
+FetchContent_MakeAvailable(xxHash)
 
 configure_file(
     "${PROJECT_SOURCE_DIR}/include/openae/config.hpp.in"
