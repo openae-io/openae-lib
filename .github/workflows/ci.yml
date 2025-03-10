@@ -53,6 +53,7 @@ jobs:
         run: >
           cmake -S . -B build
           -DCMAKE_CXX_COMPILER=${{ matrix.config.compiler }}
+          -DCMAKE_CXX_STANDARD=20
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
           -DBUILD_SHARED_LIBS=${{ matrix.library_type == 'shared' }}
           -DOPENAE_BUILD_BENCHMARKS=ON
