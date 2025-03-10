@@ -6,6 +6,7 @@ FetchContent_Declare(
     GIT_TAG           v0.8.3
     SOURCE_SUBDIR     cmake_unofficial
     EXCLUDE_FROM_ALL
+    SYSTEM
     FIND_PACKAGE_ARGS 0.8.3
 )
 FetchContent_MakeAvailable(xxHash)
