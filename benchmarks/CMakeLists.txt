@@ -5,6 +5,7 @@ FetchContent_Declare(
     benchmark
     GIT_REPOSITORY    https://github.com/google/benchmark.git
     GIT_TAG           v1.9.1
+    EXCLUDE_FROM_ALL
     SYSTEM
     FIND_PACKAGE_ARGS 1.9.1
 )
