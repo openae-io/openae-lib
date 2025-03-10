@@ -9,8 +9,7 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(Catch2)
 if(TARGET Catch2)
-    set_target_properties(Catch2 PROPERTIES CXX_CLANG_TIDY "")
-    set_target_properties(Catch2WithMain PROPERTIES CXX_CLANG_TIDY "")
+    set_target_properties(Catch2 Catch2WithMain PROPERTIES CXX_CLANG_TIDY "")
 endif()
 
 FetchContent_Declare(

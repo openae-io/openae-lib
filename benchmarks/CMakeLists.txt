@@ -9,7 +9,7 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(benchmark)
 if(TARGET benchmark)
-    set_target_properties(benchmark PROPERTIES CXX_CLANG_TIDY "")
+    set_target_properties(benchmark benchmark_main PROPERTIES CXX_CLANG_TIDY "")
 endif()
 
 file(GLOB sources "benchmark_*.cpp")
