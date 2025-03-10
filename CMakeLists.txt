@@ -8,14 +8,6 @@ project(
     LANGUAGES CXX
 )
 
-message(STATUS "Host: ${CMAKE_HOST_SYSTEM_PROCESSOR}")
-message(STATUS "Target: ${CMAKE_SYSTEM_PROCESSOR}")
-
-# set c++ standard explicitly, compile feature "cxx_std_20" does not set -std=c++20 compile flag
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
-
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
@@ -26,6 +18,10 @@ list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
 option(OPENAE_WARNINGS_AS_ERRORS "Treat warnings as errors" OFF)
 
+# interface "library" to set the c++ standard / compile-time options requested
+add_library(openae_project_options INTERFACE)
+target_compile_features(openae_project_options INTERFACE cxx_std_20)
+
 option(OPENAE_ENABLE_CLANG_TIDY "Enable static analysis with clang-tidy" OFF)
 if(OPENAE_ENABLE_CLANG_TIDY)
     message(STATUS "Static code analysis with clang-tidy enabled")
@@ -33,18 +29,14 @@ if(OPENAE_ENABLE_CLANG_TIDY)
     if(CLANG_TIDY_EXE)
         message(STATUS "Found clang-tidy: ${CLANG_TIDY_EXE}")
         if(OPENAE_WARNINGS_AS_ERRORS)
-            set(CMAKE_CXX_CLANG_TIDY "${CLANG_TIDY_EXE};-warnings-as-errors=*")
-        else()
-            set(CMAKE_CXX_CLANG_TIDY "${CLANG_TIDY_EXE}")
+            set_target_properties(openae_project_options PROPERTIES CXX_CLANG_TIDY "${CLANG_TIDY_EXE};-warnings-as-errors=*")
+            else()
+            set_target_properties(openae_project_options PROPERTIES CXX_CLANG_TIDY "${CLANG_TIDY_EXE}")
         endif()
     else()
         message(SEND_ERROR "clang-tidy requested but executable not found")
     endif()
 endif()
-
-# interface "library" to set the c++ standard / compile-time options requested
-add_library(openae_project_options INTERFACE)
-target_compile_features(openae_project_options INTERFACE cxx_std_20)
 
 if(MSVC)
     set(warnings
