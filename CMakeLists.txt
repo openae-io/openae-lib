@@ -99,6 +99,8 @@ target_link_libraries(
     openae
     PRIVATE
         $<BUILD_INTERFACE:openae_project_options>
+    PUBLIC
+        # TODO: xxhash.h not found if PRIVATE
         $<BUILD_INTERFACE:xxHash::xxhash>  # effectively header-only with XXH_INLINE_ALL
 )
 set_target_properties(
