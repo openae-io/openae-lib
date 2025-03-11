@@ -184,12 +184,12 @@ float zero_crossing_rate([[maybe_unused]] Env& env, Input input) {
 /* ----------------------------------------- Statistics ----------------------------------------- */
 
 template <size_t N>
-static float central_moment(Timedata y, float y_mean) {
+static constexpr float central_moment(Timedata y, float y_mean) {
     return mean<float>(std::views::transform(y, [y_mean](auto v) { return pow<N>(v - y_mean); }));
 }
 
 template <size_t N>
-static float standardized_moment(Timedata y) {
+static constexpr float standardized_moment(Timedata y) {
     if (y.size() < N) {
         return quite_nan<float>();
     }
@@ -219,7 +219,7 @@ float kurtosis([[maybe_unused]] Env& env, Input input) {
     return power_spectrum;
 }
 
-static auto power_spectrum_view(Spectrum spectrum) {
+static constexpr auto power_spectrum_view(Spectrum spectrum) {
     return std::views::transform(spectrum, [](auto c) { return std::norm(c); });
 }
 
@@ -312,6 +312,23 @@ float spectral_rolloff(Env& env, Input input, float rolloff) {
     const auto it = std::upper_bound(acc.begin(), acc.end(), threshold);
     const auto bin = std::distance(acc.begin(), it);
     return bin_to_hz(input.samplerate, input.spectrum.size(), bin);
+}
+
+float spectral_entropy([[maybe_unused]] Env& env, Input input) {
+    const auto power_spectrum = power_spectrum_view(input.spectrum);
+    float power_sum = 0.0F;
+    float power_sum_weighted = 0.0F;
+    for (const auto power : power_spectrum) {
+        power_sum += power;
+        if (power > 0.0F) {
+            power_sum_weighted += power * std::log2(power);
+        }
+    }
+    if (power_sum == 0.0F || power_spectrum.size() <= 1) {
+        return 0.0F;
+    }
+    const auto entropy = std::log2(power_sum) - (power_sum_weighted / power_sum);
+    return entropy / std::log2(static_cast<float>(power_spectrum.size()));
 }
 
 float spectral_flatness([[maybe_unused]] Env& env, Input input) {
