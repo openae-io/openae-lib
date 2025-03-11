@@ -35,6 +35,7 @@ OPENAE_EXPORT float spectral_variance(Env& env, Input input);
 OPENAE_EXPORT float spectral_skewness(Env& env, Input input);
 OPENAE_EXPORT float spectral_kurtosis(Env& env, Input input);
 OPENAE_EXPORT float spectral_rolloff(Env& env, Input input, float rolloff);
+OPENAE_EXPORT float spectral_entropy(Env& env, Input input);
 OPENAE_EXPORT float spectral_flatness(Env& env, Input input);
 
 }  // namespace openae::features

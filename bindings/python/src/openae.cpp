@@ -141,6 +141,7 @@ NB_MODULE(openae, m) {
     m_features.def("shape_factor", wrap_feature(openae::features::shape_factor), nb::arg("input"));
     m_features.def("skewness", wrap_feature(openae::features::skewness), nb::arg("input"));
     m_features.def("spectral_centroid", wrap_feature(openae::features::spectral_centroid), nb::arg("input"));
+    m_features.def("spectral_entropy", wrap_feature(openae::features::spectral_entropy), nb::arg("input"));
     m_features.def("spectral_flatness", wrap_feature(openae::features::spectral_flatness), nb::arg("input"));
     m_features.def("spectral_kurtosis", wrap_feature(openae::features::spectral_kurtosis), nb::arg("input"));
     m_features.def("spectral_peak_frequency", wrap_feature(openae::features::spectral_peak_frequency), nb::arg("input"));

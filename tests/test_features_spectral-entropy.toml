@@ -1,0 +1,42 @@
+feature = "spectral-entropy"
+
+[[tests]]
+name = "empty input"
+input.spectrum = []
+result = 0.0
+
+[[tests]]
+name = "single bin"
+input.samplerate = 1.0
+input.spectrum = [3]
+result = 0.0
+
+[[tests]]
+name = "zeros"
+input.samplerate = 1.0
+input.spectrum = [0, 0, 0]
+result = 0.0
+
+[[tests]]
+name = "ones"
+input.samplerate = 1.0
+input.spectrum = [1, 1, 1]
+result = 1.0
+
+[[tests]]
+name = "zeros with single peak"
+input.samplerate = 1.0
+input.spectrum = [0, 0, 2, 0]
+result = 0.0
+
+[[tests]]
+name = "zeros with two peaks"
+input.samplerate = 2.0
+input.spectrum = [0, 2, 0, 2]
+result = 0.5
+
+[[tests]]
+name = "zeros with two peaks, padded"
+input.samplerate = 5.0
+input.spectrum = [0, 3, 0, 3, 0, 0, 0, 0]
+result = 0.3333333333333333
