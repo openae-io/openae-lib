@@ -1,9 +1,9 @@
 #include <complex>
-#include <format>
 #include <memory_resource>
 #include <string>
 #include <utility>
 
+#include <fmt/format.h>
 #include <nanobind/nanobind.h>
 #include <nanobind/ndarray.h>
 #include <nanobind/stl/string.h>
@@ -22,7 +22,7 @@ struct PyInput {
     PySpectrum spectrum;
 
     std::string repr() const {
-        return std::format("Input(samplerate={}, timedata=..., spectrum=...)", samplerate);
+        return fmt::format("Input(samplerate={}, timedata=..., spectrum=...)", samplerate);
     }
 
     std::string str() const {
@@ -85,9 +85,7 @@ constexpr int py_log_level(openae::LogLevel level) noexcept {
     }
 }
 
-void py_log(
-    openae::LogLevel level, const char* msg, [[maybe_unused]] std::source_location location
-) {
+void py_log(openae::LogLevel level, const char* msg) {
     auto logger = nb::module_::import_("logging").attr("getLogger")("openae");
     // https://docs.python.org/3/library/logging.html#logrecord-objects
     nb::dict kwargs;  // NOLINT(*const-correctness), false positive

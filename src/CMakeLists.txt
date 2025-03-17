@@ -1,4 +1,14 @@
 include(FetchContent)
+FetchContent_Declare(
+  fmt
+  GIT_REPOSITORY      https://github.com/fmtlib/fmt
+  GIT_TAG             11.1.4
+  EXCLUDE_FROM_ALL
+  SYSTEM
+  FIND_PACKAGE_ARGS   11.0.0...12.0.0
+)
+FetchContent_MakeAvailable(fmt)
+
 option(XXHASH_BUILD_XXHSUM "Build the xxhsum binary" OFF)
 FetchContent_Declare(
     xxHash
@@ -7,7 +17,7 @@ FetchContent_Declare(
     SOURCE_SUBDIR     cmake_unofficial
     EXCLUDE_FROM_ALL
     SYSTEM
-    FIND_PACKAGE_ARGS 0.8.3
+    FIND_PACKAGE_ARGS 0.8.3...0.9.0
 )
 FetchContent_MakeAvailable(xxHash)
 
@@ -39,6 +49,7 @@ target_link_libraries(
     openae
     PRIVATE
         $<BUILD_INTERFACE:openae_project_options>
+        fmt::fmt
     PUBLIC
         # TODO: xxhash.h not found if PRIVATE
         $<BUILD_INTERFACE:xxHash::xxhash>  # effectively header-only with XXH_INLINE_ALL
