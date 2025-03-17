@@ -71,6 +71,9 @@ FetchContent_Declare(
   FIND_PACKAGE_ARGS   11.0.0...12.0.0
 )
 FetchContent_MakeAvailable(fmt)
+if(TARGET fmt)
+    set_target_properties(fmt PROPERTIES CXX_CLANG_TIDY "")
+endif()
 
 option(XXHASH_BUILD_XXHSUM "Build the xxhsum binary" OFF)
 FetchContent_Declare(
