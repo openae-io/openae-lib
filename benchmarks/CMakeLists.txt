@@ -7,7 +7,7 @@ FetchContent_Declare(
     GIT_TAG           v1.9.1
     EXCLUDE_FROM_ALL
     SYSTEM
-    FIND_PACKAGE_ARGS 1.9.0...2.0.0
+    FIND_PACKAGE_ARGS 1.9.1
 )
 FetchContent_MakeAvailable(benchmark)
 if(TARGET benchmark)

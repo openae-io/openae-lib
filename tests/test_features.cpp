@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <array>
 #include <filesystem>
+#include <format>
 #include <map>
 #include <stdexcept>
 #include <string>
@@ -145,7 +146,7 @@ R compute_feature(
     for_each(args, [&, index = size_t{0}]<typename Arg>(Arg& arg) mutable {
         const auto& param_name = param_names.at(index++);
         if (not param_values.contains(param_name)) {
-            throw std::runtime_error(std::string{"Parameter not found: "}.append(param_name));
+            throw std::runtime_error(std::format("Parameter not found: {}", param_name));
         }
         arg = static_cast<Arg>(param_values.at(param_name));
     });

@@ -1,3 +1,16 @@
+include(FetchContent)
+option(XXHASH_BUILD_XXHSUM "Build the xxhsum binary" OFF)
+FetchContent_Declare(
+    xxHash
+    GIT_REPOSITORY    https://github.com/Cyan4973/xxHash.git
+    GIT_TAG           v0.8.3
+    SOURCE_SUBDIR     cmake_unofficial
+    EXCLUDE_FROM_ALL
+    SYSTEM
+    FIND_PACKAGE_ARGS 0.8.3
+)
+FetchContent_MakeAvailable(xxHash)
+
 configure_file(
     "${PROJECT_SOURCE_DIR}/include/openae/config.hpp.in"
     "${PROJECT_BINARY_DIR}/include/openae/config.hpp"
@@ -26,7 +39,6 @@ target_link_libraries(
     openae
     PRIVATE
         $<BUILD_INTERFACE:openae_project_options>
-        fmt::fmt
     PUBLIC
         # TODO: xxhash.h not found if PRIVATE
         $<BUILD_INTERFACE:xxHash::xxhash>  # effectively header-only with XXH_INLINE_ALL

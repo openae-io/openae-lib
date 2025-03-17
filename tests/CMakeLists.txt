@@ -7,7 +7,7 @@ FetchContent_Declare(
     GIT_TAG           v3.8.0
     EXCLUDE_FROM_ALL
     SYSTEM
-    FIND_PACKAGE_ARGS 3.8.0...4.0.0
+    FIND_PACKAGE_ARGS 3.8.0
 )
 FetchContent_MakeAvailable(Catch2)
 if(TARGET Catch2)
@@ -20,7 +20,7 @@ FetchContent_Declare(
     GIT_TAG           v3.4.0
     EXCLUDE_FROM_ALL
     SYSTEM
-    FIND_PACKAGE_ARGS 3.4.0...4.0.0
+    FIND_PACKAGE_ARGS 3.4.0
 )
 FetchContent_MakeAvailable(tomlplusplus)
 
