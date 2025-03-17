@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.20) # should be 3.23 but Python build fails with scikit-build-core
+cmake_minimum_required(VERSION 3.24)
 
 project(
     openae
