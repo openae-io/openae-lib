@@ -107,6 +107,8 @@ endif()
 
 # bindings
 option(OPENAE_BUILD_PYTHON "Build Python bindings" OFF)
+include(CMakeDependentOption)
+cmake_dependent_option(OPENAE_BUILD_PYTHON_STUBS "Build Python stubs" ON "OPENAE_BUILD_PYTHON" OFF)
 if(OPENAE_BUILD_PYTHON)
     add_subdirectory(bindings/python)
 endif()

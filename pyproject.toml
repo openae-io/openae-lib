@@ -101,7 +101,7 @@ ignore = [
 
 [tool.scikit-build]
 cmake.build-type = "Release"
-cmake.define = { "BUILD_SHARED_LIBS" = "OFF", "OPENAE_BUILD_PYTHON" = "ON" }
+cmake.define = { "BUILD_SHARED_LIBS" = "OFF", "OPENAE_BUILD_PYTHON" = "ON", "OPENAE_BUILD_PYTHON_STUBS" = "OFF" }
 wheel.packages = ["openae"]
 build.verbose = true
 build-dir = "build/python/{wheel_tag}"
