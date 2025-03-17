@@ -60,6 +60,30 @@ else()
     target_compile_options(openae_project_options INTERFACE ${warnings})
 endif()
 
+# dependencies
+include(FetchContent)
+FetchContent_Declare(
+  fmt
+  GIT_REPOSITORY      https://github.com/fmtlib/fmt
+  GIT_TAG             11.1.4
+  EXCLUDE_FROM_ALL
+  SYSTEM
+  FIND_PACKAGE_ARGS   11.0.0...12.0.0
+)
+FetchContent_MakeAvailable(fmt)
+
+option(XXHASH_BUILD_XXHSUM "Build the xxhsum binary" OFF)
+FetchContent_Declare(
+    xxHash
+    GIT_REPOSITORY    https://github.com/Cyan4973/xxHash.git
+    GIT_TAG           v0.8.3
+    SOURCE_SUBDIR     cmake_unofficial
+    EXCLUDE_FROM_ALL
+    SYSTEM
+    FIND_PACKAGE_ARGS 0.8.3...0.9.0
+)
+FetchContent_MakeAvailable(xxHash)
+
 # library
 add_subdirectory(src)
 
