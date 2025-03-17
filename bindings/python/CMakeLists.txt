@@ -16,9 +16,8 @@ target_sources(
 target_link_libraries(
     openae_bindings_python
     PRIVATE
-        openae_project_options
         openae
-        fmt::fmt-header-only
+        openae_project_options
 )
 set_target_properties(
     openae_bindings_python
