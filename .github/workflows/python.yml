@@ -40,7 +40,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Build wheels
         env:
-          MACOSX_DEPLOYMENT_TARGET: "10.15" # https://cibuildwheel.pypa.io/en/stable/cpp_standards/#macos-and-deployment-target-versions
+          MACOSX_DEPLOYMENT_TARGET: "13.3" # https://cibuildwheel.pypa.io/en/stable/cpp_standards/#macos-and-deployment-target-versions
         uses: pypa/cibuildwheel@v2.23.0
       - uses: actions/upload-artifact@v4
         with:
