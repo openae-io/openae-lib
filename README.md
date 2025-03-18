@@ -17,9 +17,11 @@ The library is implemented in C++20 and offers bindings for:
 The library can be built, integrated and installed using [CMake](https://cmake.org/runningcmake/) and a C++20 compiler.
 Following build options are available:
 
-- `OPENAE_BUILD_PYTHON`: Build Python bindings
-- `OPENAE_BUILD_BENCHMARKS`: Build benchmarks
 - `OPENAE_BUILD_TESTS`: Build unit tests
+- `OPENAE_BUILD_BENCHMARKS`: Build benchmarks
+- `OPENAE_BUILD_PYTHON`: Build Python bindings
+- `OPENAE_WARNINGS_AS_ERRORS`: Treat warnings as errors
+- `OPENAE_ENABLE_CLANG_TIDY`: Enable static analysis with Clang-Tidy
 
 Requirements:
 - CMake 3.24 or higher
