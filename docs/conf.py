@@ -8,7 +8,13 @@ from datetime import datetime, timezone
 from importlib import metadata
 from pathlib import Path
 
-subprocess.check_call("doxygen", cwd=Path(__file__).parent)
+HERE = Path(__file__).parent
+BUILD_DIR = HERE / "_build"
+DOXYGEN_DIR = BUILD_DIR / "doxygen"
+DOXYGEN_XML_DIR = DOXYGEN_DIR / "xml"
+
+DOXYGEN_DIR.mkdir(parents=True, exist_ok=True)
+subprocess.check_call("doxygen", cwd=HERE)
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
@@ -50,7 +56,7 @@ autosummary_generate = True
 
 myst_enable_extensions = ["colon_fence"]
 
-breathe_projects = {"openae": "_build/doxygen/xml"}
+breathe_projects = {"openae": DOXYGEN_XML_DIR}
 breathe_default_project = "openae"
 breathe_default_members = ("members", "undoc-members")
 breathe_show_include = False
