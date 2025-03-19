@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import numpy as np
-import openae
+import openae.features
 import pytest
 
 if sys.version_info >= (3, 11):

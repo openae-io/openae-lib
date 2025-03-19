@@ -1,5 +1,5 @@
 import numpy as np
-import openae
+import openae.features
 import pytest
 
 SAMPLES = 65536
