@@ -42,6 +42,14 @@ keywords = [
 dependencies = ["numpy>=1.20"]
 
 [project.optional-dependencies]
+docs = [
+    "sphinx>=8",
+    "sphinx-autodoc-typehints",
+    "sphinx-design",
+    "myst-parser",
+    "breathe>=4",
+    "furo",
+]
 tests = [
     "coverage[toml]>=5", # pyproject.toml support
     "pytest>=6", # pyproject.toml support
@@ -53,7 +61,7 @@ tools = [
     "ruff>=0.9",
 ]
 dev = [
-    "openae[tests,tools]", # recursive dependency since pip 21.2
+    "openae[docs,tests,tools]", # recursive dependency since pip 21.2
 ]
 
 [project.urls]

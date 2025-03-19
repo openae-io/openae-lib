@@ -1,0 +1,42 @@
+################################################################################
+# Primary project setup.                                                       #
+################################################################################
+
+PROJECT_NAME           = "openae"
+OUTPUT_DIRECTORY       = _build/doxygen
+INPUT                  = ../include/
+STRIP_FROM_INC_PATH    = ../include/
+STRIP_FROM_PATH        = ../include/
+FILE_PATTERNS          = *.hpp
+RECURSIVE              = YES
+GENERATE_HTML          = YES
+GENERATE_LATEX         = NO
+GENERATE_XML           = YES
+XML_PROGRAMLISTING     = YES
+
+################################################################################
+# Doxygen preprocessor / parser control.                                       #
+################################################################################
+
+ENABLE_PREPROCESSING   = YES
+MACRO_EXPANSION        = YES
+PREDEFINED             = OPENAE_EXPORT=
+
+################################################################################
+# Compound extraction control.                                                 #
+################################################################################
+
+EXTRACT_ALL            = YES
+
+################################################################################
+# Docstring control / customization.                                           #
+################################################################################
+
+JAVADOC_AUTOBRIEF      = YES
+
+################################################################################
+# Warning suppression.                                                         #
+################################################################################
+
+QUIET                  = YES
+WARN_IF_UNDOCUMENTED   = NO
