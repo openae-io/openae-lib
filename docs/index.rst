@@ -10,7 +10,7 @@ Contents
     :maxdepth: 1
     :caption: C++
 
-    cpp/gstarted
+    cpp/get-started
     cpp/api
 
 .. toctree::
