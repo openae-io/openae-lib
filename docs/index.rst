@@ -17,6 +17,7 @@ Contents
     :maxdepth: 1
     :caption: Python
 
+    python/get-started
     python/api
 
 Indices and tables
