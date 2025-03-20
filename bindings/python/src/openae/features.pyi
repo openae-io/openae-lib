@@ -28,40 +28,135 @@ class Input:
 
     def __str__(self) -> str: ...
 
-def clearance_factor(input: Input) -> float: ...
+def clearance_factor(input: Input) -> float:
+    """
+    Compute feature `clearance-factor`.
 
-def crest_factor(input: Input) -> float: ...
+    Definition: https://openae.io/standards/features/latest/clearance-factor
+    """
 
-def energy(input: Input) -> float: ...
+def crest_factor(input: Input) -> float:
+    """
+    Compute feature `crest-factor`.
 
-def impulse_factor(input: Input) -> float: ...
+    Definition: https://openae.io/standards/features/latest/crest-factor
+    """
 
-def kurtosis(input: Input) -> float: ...
+def energy(input: Input) -> float:
+    """
+    Compute feature `energy`.
 
-def partial_power(input: Input, fmin: float, fmax: float) -> float: ...
+    Definition: https://openae.io/standards/features/latest/energy
+    """
 
-def peak_amplitude(input: Input) -> float: ...
+def impulse_factor(input: Input) -> float:
+    """
+    Compute feature `impulse-factor`.
 
-def rms(input: Input) -> float: ...
+    Definition: https://openae.io/standards/features/latest/impulse-factor
+    """
 
-def shape_factor(input: Input) -> float: ...
+def kurtosis(input: Input) -> float:
+    """
+    Compute feature `kurtosis`.
 
-def skewness(input: Input) -> float: ...
+    Definition: https://openae.io/standards/features/latest/kurtosis
+    """
 
-def spectral_centroid(input: Input) -> float: ...
+def partial_power(input: Input, fmin: float, fmax: float) -> float:
+    """
+    Compute feature `partial-power`.
 
-def spectral_entropy(input: Input) -> float: ...
+    Definition: https://openae.io/standards/features/latest/partial-power
+    """
 
-def spectral_flatness(input: Input) -> float: ...
+def peak_amplitude(input: Input) -> float:
+    """
+    Compute feature `peak-amplitude`.
 
-def spectral_kurtosis(input: Input) -> float: ...
+    Definition: https://openae.io/standards/features/latest/peak-amplitude
+    """
 
-def spectral_peak_frequency(input: Input) -> float: ...
+def rms(input: Input) -> float:
+    """
+    Compute feature `rms`.
 
-def spectral_rolloff(input: Input, rolloff: float) -> float: ...
+    Definition: https://openae.io/standards/features/latest/rms
+    """
 
-def spectral_skewness(input: Input) -> float: ...
+def shape_factor(input: Input) -> float:
+    """
+    Compute feature `shape-factor`.
 
-def spectral_variance(input: Input) -> float: ...
+    Definition: https://openae.io/standards/features/latest/shape-factor
+    """
 
-def zero_crossing_rate(input: Input) -> float: ...
+def skewness(input: Input) -> float:
+    """
+    Compute feature `skewness`.
+
+    Definition: https://openae.io/standards/features/latest/skewness
+    """
+
+def spectral_centroid(input: Input) -> float:
+    """
+    Compute feature `spectral-centroid`.
+
+    Definition: https://openae.io/standards/features/latest/spectral-centroid
+    """
+
+def spectral_entropy(input: Input) -> float:
+    """
+    Compute feature `spectral-entropy`.
+
+    Definition: https://openae.io/standards/features/latest/spectral-entropy
+    """
+
+def spectral_flatness(input: Input) -> float:
+    """
+    Compute feature `spectral-flatness`.
+
+    Definition: https://openae.io/standards/features/latest/spectral-flatness
+    """
+
+def spectral_kurtosis(input: Input) -> float:
+    """
+    Compute feature `spectral-kurtosis`.
+
+    Definition: https://openae.io/standards/features/latest/spectral-kurtosis
+    """
+
+def spectral_peak_frequency(input: Input) -> float:
+    """
+    Compute feature `spectral-peak-frequency`.
+
+    Definition: https://openae.io/standards/features/latest/spectral-peak-frequency
+    """
+
+def spectral_rolloff(input: Input, rolloff: float) -> float:
+    """
+    Compute feature `spectral-rolloff`.
+
+    Definition: https://openae.io/standards/features/latest/spectral-rolloff
+    """
+
+def spectral_skewness(input: Input) -> float:
+    """
+    Compute feature `spectral-skewness`.
+
+    Definition: https://openae.io/standards/features/latest/spectral-skewness
+    """
+
+def spectral_variance(input: Input) -> float:
+    """
+    Compute feature `spectral-variance`.
+
+    Definition: https://openae.io/standards/features/latest/spectral-variance
+    """
+
+def zero_crossing_rate(input: Input) -> float:
+    """
+    Compute feature `zero-crossing-rate`.
+
+    Definition: https://openae.io/standards/features/latest/zero-crossing-rate
+    """

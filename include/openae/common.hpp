@@ -19,15 +19,20 @@ enum class LogLevel : std::uint8_t {
     Fatal,
 };
 
+/// Log function.
 using Logger =
-    std::function<void(LogLevel level, const char* message, std::source_location location)>;
+std::function<void(LogLevel level, const char* message, std::source_location location)>;
 
+/// Memory resource.
 using MemoryResource = std::pmr::memory_resource;
 
+/// Cache (opaque type).
 struct Cache;
 
+/// Create cache.
 OPENAE_EXPORT std::unique_ptr<Cache, void (*)(Cache*)> make_cache();
 
+/// The Env structure serves as a (shared) execution context.
 struct Env {
     Logger logger = nullptr;
     MemoryResource* mem_resource = nullptr;

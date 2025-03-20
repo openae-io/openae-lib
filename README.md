@@ -1,55 +1,19 @@
 # OpenAE Library
 
-The OpenAE library is a high-performance implementation of the [OpenAE](https://openae.io) standards for real-time acoustic emission signal processing:
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![CI](https://github.com/openae-io/openae-lib/actions/workflows/ci.yml/badge.svg)](https://github.com/openae-io/openae-lib/actions/workflows/ci.yml)
+[![Python](https://github.com/openae-io/openae-lib/actions/workflows/python.yml/badge.svg)](https://github.com/openae-io/openae-lib/actions/workflows/python.yml)
 
-- [Feature extraction algorithms](https://openae.io/standards/features/)
+The OpenAE library is a high-performance implementation of the [OpenAE](https://openae.io/standards/) for acoustic emission signal processing.
 
-The library is implemented in C++20 and offers bindings for:
+The library is written in C++ for best performance and includes bindings for popular programming languages to enable seamless integration across different environments:
 
-- [x] Python 
+- [x] C++20
+- [x] Python
 - [ ] MATLAB 🚧
 - [ ] C 🚧
-- [ ] Web Assembly 🚧
-- [ ] Node.js 🚧
+- [ ] Web Assembly / Node.js 🚧
 
-## 🚀 Getting started
+## 📖 Documentation
 
-The library can be built, integrated and installed using [CMake](https://cmake.org/runningcmake/) and a C++20 compiler.
-Following build options are available:
-
-- `OPENAE_BUILD_TESTS`: Build unit tests
-- `OPENAE_BUILD_BENCHMARKS`: Build benchmarks
-- `OPENAE_BUILD_PYTHON`: Build Python bindings
-- `OPENAE_WARNINGS_AS_ERRORS`: Treat warnings as errors
-- `OPENAE_ENABLE_CLANG_TIDY`: Enable static analysis with Clang-Tidy
-
-Requirements:
-- CMake 3.24 or higher
-- C++20 compiler
-
-### Build
-
-```shell
-# clone repository
-git clone --recursive https://github.com/openae-io/openae-lib.git
-cd openae-lib
-
-# build
-mkdir build
-cd build
-cmake -DCMAKE_BUILD_TYPE=Release -DOPENAE_BUILD_TESTS=ON ..
-cmake --build .                   # single-configuration generator like Make or Ninja
-cmake --build . --config Release  # multi-configuration generator like Visual Studio, Xcode
-
-# run tests
-ctest --output-on-failure
-```
-
-### Integrate as an embedded (in-source) dependency
-
-Add it to your project as a Git submodule (`git submodule add https://github.com/openae-io/openae-lib.git`) and link it with CMake:
-
-```cmake
-add_subdirectory(extern/openae-lib)  # the submodule directory
-target_link_libraries(myexecutable PRIVATE openae::openae)
-```
+For more, see the [documentation](https://openae-lib.readthedocs.io).
