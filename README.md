@@ -3,6 +3,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![CI](https://github.com/openae-io/openae-lib/actions/workflows/ci.yml/badge.svg)](https://github.com/openae-io/openae-lib/actions/workflows/ci.yml)
 [![Python](https://github.com/openae-io/openae-lib/actions/workflows/python.yml/badge.svg)](https://github.com/openae-io/openae-lib/actions/workflows/python.yml)
+[![DOI](https://zenodo.org/badge/906944590.svg)](https://doi.org/10.5281/zenodo.15066089)
 
 The OpenAE library is a high-performance implementation of the [OpenAE](https://openae.io/standards/) for acoustic emission signal processing.
 
