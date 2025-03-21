@@ -98,15 +98,16 @@ template <typename Func, typename... Args>
 static void run_monotonic(benchmark::State& state, Func func, Args... args) {
     std::vector<std::byte> buffer(buffer_size);
     AllocationCounter new_delete_resource{std::pmr::new_delete_resource()};
+    std::pmr::monotonic_buffer_resource buffer_resource{
+        buffer.data(), buffer.size(), &new_delete_resource
+    };
+    openae::Env env{};
+    env.mem_resource = &buffer_resource;
 
     const auto input = make_random_input(1, state.range(0));
     for ([[maybe_unused]] auto _ : state) {
         state.PauseTiming();
-        std::pmr::monotonic_buffer_resource buffer_resource{
-            buffer.data(), buffer.size(), &new_delete_resource
-        };
-        openae::Env env{};
-        env.mem_resource = &buffer_resource;
+        buffer_resource.release();
         state.ResumeTiming();
 
         auto result = func(env, input, args...);
@@ -118,12 +119,10 @@ static void run_monotonic(benchmark::State& state, Func func, Args... args) {
 
 template <typename Func, typename... Args>
 static void run_pool(benchmark::State& state, Func func, Args... args) {
-    std::vector<std::byte> buffer(buffer_size);
     AllocationCounter new_delete_resource{std::pmr::new_delete_resource()};
-    std::pmr::monotonic_buffer_resource buffer_resource{
-        buffer.data(), buffer.size(), &new_delete_resource
-    };
-    std::pmr::unsynchronized_pool_resource pool_resource{&buffer_resource};
+    std::pmr::pool_options pool_options{};
+    pool_options.largest_required_pool_block = buffer_size;
+    std::pmr::unsynchronized_pool_resource pool_resource{pool_options, &new_delete_resource};
     openae::Env env{};
     env.mem_resource = &pool_resource;
 
