@@ -5,12 +5,13 @@
 [![Python](https://github.com/openae-io/openae-lib/actions/workflows/python.yml/badge.svg)](https://github.com/openae-io/openae-lib/actions/workflows/python.yml)
 [![DOI](https://zenodo.org/badge/906944590.svg)](https://doi.org/10.5281/zenodo.15066089)
 
-The OpenAE library is a high-performance implementation of the [OpenAE](https://openae.io/standards/) for acoustic emission signal processing.
+The OpenAE library is a high-performance implementation of the [OpenAE standards](https://openae.io/standards/) for acoustic emission signal processing.
 
-The library is written in C++ for best performance and includes bindings for popular programming languages to enable seamless integration across different environments:
+The library is written in C++ and includes bindings for popular programming languages to enable seamless integration across different environments:
 
 - [x] C++20
 - [x] Python
+- [ ] Vamp plugin 🚧
 - [ ] MATLAB 🚧
 - [ ] C 🚧
 - [ ] Web Assembly / Node.js 🚧
