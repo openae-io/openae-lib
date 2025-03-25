@@ -7,19 +7,22 @@ class Input:
     def __init__(self, samplerate: float, timedata: Annotated[ArrayLike, dict(dtype='float32', shape=(None), order='C')], spectrum: Annotated[ArrayLike, dict(dtype='complex64', shape=(None), order='C')]) -> None: ...
 
     @property
-    def samplerate(self) -> float: ...
+    def samplerate(self) -> float:
+        """Sampling rate in Hz"""
 
     @samplerate.setter
     def samplerate(self, arg: float, /) -> None: ...
 
     @property
-    def timedata(self) -> Annotated[ArrayLike, dict(dtype='float32', shape=(None), order='C')]: ...
+    def timedata(self) -> Annotated[ArrayLike, dict(dtype='float32', shape=(None), order='C')]:
+        """Time-domain signal (typically in volts)"""
 
     @timedata.setter
     def timedata(self, arg: Annotated[ArrayLike, dict(dtype='float32', shape=(None), order='C')], /) -> None: ...
 
     @property
-    def spectrum(self) -> Annotated[ArrayLike, dict(dtype='complex64', shape=(None), order='C')]: ...
+    def spectrum(self) -> Annotated[ArrayLike, dict(dtype='complex64', shape=(None), order='C')]:
+        """One-sided spectrum of `timedata`"""
 
     @spectrum.setter
     def spectrum(self, arg: Annotated[ArrayLike, dict(dtype='complex64', shape=(None), order='C')], /) -> None: ...
