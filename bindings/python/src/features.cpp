@@ -95,9 +95,9 @@ NB_MODULE(features, m) {
             nb::arg("timedata"),
             nb::arg("spectrum")
         )
-        .def_rw("samplerate", &PyInput::samplerate)
-        .def_rw("timedata", &PyInput::timedata)
-        .def_rw("spectrum", &PyInput::spectrum)
+        .def_rw("samplerate", &PyInput::samplerate, "Sampling rate in Hz")
+        .def_rw("timedata", &PyInput::timedata, "Time-domain signal (typically in volts)")
+        .def_rw("spectrum", &PyInput::spectrum, "One-sided spectrum of `timedata`")
         .def("__repr__", &PyInput::repr)
         .def("__str__", &PyInput::str);
 
