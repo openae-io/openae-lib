@@ -23,7 +23,7 @@ struct Input {
     float samplerate;
     /// Time-domain signal (typically in volts).
     std::span<const float> timedata;
-    /// Fourier-transformed representation of `timedata`.
+    /// One-sided spectrum of `timedata`.
     std::span<const std::complex<float>> spectrum;
     /// Optional fingerprint for caching.
     std::optional<std::size_t> fingerprint;
