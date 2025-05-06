@@ -89,7 +89,12 @@ constexpr float bin_to_hz(float samplerate, std::integral auto bins, auto bin) n
     return 0.5F * samplerate * static_cast<float>(bin) / static_cast<float>(bins - 1);
 }
 
-constexpr size_t hz_to_bin(float samplerate, std::integral auto bins, float frequency) noexcept {
+constexpr size_t hz_to_bin(
+    float samplerate,
+    std::integral auto bins,
+    float frequency,
+    float (*rounding_func)(float) = std::round
+) noexcept {
     if (samplerate == 0.0F || bins <= 1) {
         return 0;
     }
@@ -97,7 +102,7 @@ constexpr size_t hz_to_bin(float samplerate, std::integral auto bins, float freq
     assert(frequency >= 0.0F);
     assert(frequency <= 0.5F * samplerate);
     const auto bin = static_cast<float>(bins - 1) * frequency / (0.5F * samplerate);
-    return static_cast<size_t>(std::round(bin));
+    return static_cast<size_t>(rounding_func(bin));
 }
 
 namespace views {
@@ -226,14 +231,14 @@ static constexpr auto power_spectrum_view(Spectrum spectrum) {
 float partial_power([[maybe_unused]] Env& env, Input input, float fmin, float fmax) {
     fmin = std::clamp(fmin, 0.0F, 0.5F * input.samplerate);
     fmax = std::clamp(fmax, fmin, 0.5F * input.samplerate);
-    const auto power_spectrum = power_spectrum_view(input.spectrum);
-    const auto power_spectrum_range = std::ranges::subrange(
+    const auto ps = power_spectrum_view(input.spectrum);
+    const auto ps_range = std::ranges::subrange(
         // NOLINTBEGIN(*narrowing-conversions)
-        power_spectrum.begin() + hz_to_bin(input.samplerate, power_spectrum.size(), fmin),
-        power_spectrum.begin() + hz_to_bin(input.samplerate, power_spectrum.size(), fmax)
+        ps.begin() + hz_to_bin(input.samplerate, ps.size(), fmin, std::floor),
+        ps.begin() + hz_to_bin(input.samplerate, ps.size(), fmax, std::floor)
         // NOLINTEND(*narrowing-conversions)
     );
-    return sum<float>(power_spectrum_range) / sum<float>(power_spectrum);
+    return sum<float>(ps_range) / sum<float>(ps);
 }
 
 float spectral_peak_frequency([[maybe_unused]] Env& env, Input input) {
