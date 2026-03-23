@@ -133,6 +133,7 @@ build = [
     "cp3*-macosx_x86_64",
     "cp3*-macosx_arm64",
     "cp3*-win_amd64",
+    "cp3*-pyodide_wasm32",
 ]
 skip = [
     "cp38-macosx_arm64", # https://cibuildwheel.pypa.io/en/stable/faq/#macos-building-cpython-38-wheels-on-arm64
@@ -147,3 +148,6 @@ manylinux-aarch64-image = "manylinux_2_28"
 # musllinux_1_2 with GCC 14
 musllinux-x86_64-image = "musllinux_1_2"
 musllinux-aarch64-image = "musllinux_1_2"
+
+[tool.cibuildwheel.pyodide]
+test-command = ""  # Pyodide wheels cannot run pytest on the standard GitHub runner
