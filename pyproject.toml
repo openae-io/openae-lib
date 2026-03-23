@@ -151,4 +151,4 @@ musllinux-x86_64-image = "musllinux_1_2"
 musllinux-aarch64-image = "musllinux_1_2"
 
 [tool.cibuildwheel.pyodide]
-test-command = ""  # Pyodide wheels cannot run pytest on the standard GitHub runner
+test-command = "" # Pyodide wheels cannot run pytest on the standard GitHub runner

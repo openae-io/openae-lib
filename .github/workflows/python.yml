@@ -50,6 +50,7 @@ jobs:
           MACOSX_DEPLOYMENT_TARGET: "14.0"
           CIBW_ARCHS_MACOS: "x86_64 arm64" # https://cibuildwheel.pypa.io/en/stable/faq/#cross-compiling
           CIBW_PLATFORM: ${{ matrix.config.platform }}
+          CIBW_PYODIDE_VERSION: "0.28.1" # required by Python 3.13
         uses: pypa/cibuildwheel@v2.23.0
       - uses: actions/upload-artifact@v4
         with:
