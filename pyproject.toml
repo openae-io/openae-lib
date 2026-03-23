@@ -135,8 +135,6 @@ build = [
     "cp3*-pyodide_wasm32",
 ]
 skip = [
-    "cp36*",
-    "cp37*",
     "cp38*",
 ]
 build-verbosity = 1
