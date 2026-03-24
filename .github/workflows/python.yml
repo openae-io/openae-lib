@@ -78,12 +78,15 @@ jobs:
       name: testpypi
       url: https://test.pypi.org/p/openae
     permissions:
-      id-token: write  # IMPORTANT: mandatory for trusted publishing
+      id-token: write
     steps:
-    - uses: actions/download-artifact@v6
+    - name: Download all artifacts
+      uses: actions/download-artifact@v6
       with:
-        name: cibw-*
         path: dist/
-    - uses: pypa/gh-action-pypi-publish@release/v1
+        pattern: cibw-*
+        merge-multiple: true
+    - name: Publish to TestPyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
       with:
         repository-url: https://test.pypi.org/legacy/
