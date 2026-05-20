@@ -22,7 +22,7 @@ constexpr T quite_nan() noexcept {
     return std::numeric_limits<T>::quiet_NaN();
 }
 
-/// Ìntegral-valued powers
+/// Integral-valued powers
 /// @see https://en.wikipedia.org/wiki/Exponentiation_by_squaring
 /// @see https://github.com/kthohr/gcem/blob/master/include%2Fgcem_incl%2Fpow_integral.hpp
 template <size_t Exp, typename T>
