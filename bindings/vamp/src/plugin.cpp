@@ -472,9 +472,10 @@ inline constexpr auto descriptor_table = make_descriptor_table(
 #endif
 
 extern "C" OPENAE_VAMP_EXPORT const VampPluginDescriptor* vampGetPluginDescriptor(
-    unsigned int host_api_version, unsigned int index
+    // NOLINTNEXTLINE(readability-identifier-naming), parameter name dictated by vamp.h declaration
+    unsigned int hostApiVersion, unsigned int index
 ) {
-    if (host_api_version < 1) {
+    if (hostApiVersion < 1) {
         return nullptr;
     }
     if (index >= descriptor_table.size()) {
