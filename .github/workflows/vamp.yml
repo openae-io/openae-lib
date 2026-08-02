@@ -1,0 +1,97 @@
+name: Vamp plugin
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - name: linux-x86_64
+            os: ubuntu-24.04
+
+          - name: linux-arm64
+            os: ubuntu-24.04-arm
+
+          - name: macos # universal binary
+            os: macos-15
+            osx_architectures: "x86_64;arm64"
+
+          - name: windows-x64
+            os: windows-2022
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Configure CMake
+        env:
+          # <memory_resource> requires 14.0: https://developer.apple.com/xcode/cpp/
+          MACOSX_DEPLOYMENT_TARGET: "14.0"
+          CMAKE_OSX_ARCHITECTURES: ${{ matrix.config.osx_architectures }}
+        run: >
+          cmake -S . -B build
+          -DCMAKE_BUILD_TYPE=Release
+          -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded
+          -DBUILD_SHARED_LIBS=OFF
+          -DOPENAE_BUILD_TESTS=ON
+          -DOPENAE_BUILD_VAMP=ON
+
+      - name: Build
+        run: cmake --build build --config Release --parallel
+
+      - name: Run tests
+        run: ctest --test-dir build --build-config Release --output-on-failure
+
+      - name: Package
+        shell: bash
+        run: |
+          cmake --install build --config Release --component vamp --prefix stage
+          mkdir package
+          cp stage/lib*/vamp/* package/
+          cp bindings/vamp/dist/README.md package/
+          cp LICENSE package/
+
+      - name: Verify universal binary
+        if: runner.os == 'macOS'
+        run: lipo package/openae.dylib -verify_arch x86_64 arm64
+
+      - uses: actions/upload-artifact@v6
+        with:
+          name: vamp-${{ matrix.config.name }}
+          path: package/*
+          if-no-files-found: error
+
+  release-assets:
+    name: Attach release assets
+    if: github.event_name == 'release'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v6
+        with:
+          pattern: vamp-*
+          path: artifacts/
+
+      - name: Create archives and upload to release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          cd artifacts
+          for dir in vamp-*/; do
+            platform="${dir#vamp-}"
+            platform="${platform%/}"
+            (cd "$dir" && zip -r "../openae-vamp-${version}-${platform}.zip" .)
+          done
+          gh release upload "$GITHUB_REF_NAME" openae-vamp-*.zip --clobber --repo "$GITHUB_REPOSITORY"
