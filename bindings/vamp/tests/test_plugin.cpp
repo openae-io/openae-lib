@@ -113,8 +113,15 @@ TEST_CASE("process() feeds time-domain input to the feature and returns its valu
     }
 
     openae::Env env{};
-    const auto expected =
-        openae::features::rms(env, {.samplerate = samplerate, .timedata = block});
+    const auto expected = openae::features::rms(
+        env,
+        {
+            .samplerate = samplerate,
+            .timedata = block,
+            .spectrum = {},
+            .fingerprint = {},
+        }
+    );
 
     auto* handle = d->instantiate(d, samplerate);
     REQUIRE(handle != nullptr);
@@ -139,7 +146,13 @@ TEST_CASE("process() maps frequency-domain input to a one-sided complex spectrum
 
     openae::Env env{};
     const auto expected = openae::features::spectral_peak_frequency(
-        env, {.samplerate = samplerate, .spectrum = spectrum}
+        env,
+        {
+            .samplerate = samplerate,
+            .timedata = {},
+            .spectrum = spectrum,
+            .fingerprint = {},
+        }
     );
 
     auto* handle = d->instantiate(d, samplerate);
@@ -185,7 +198,12 @@ TEST_CASE("parameters round-trip and are forwarded to the feature computation", 
         const auto block = interleave(spectrum);
 
         openae::Env env{};
-        const openae::features::Input input{.samplerate = samplerate, .spectrum = spectrum};
+        const openae::features::Input input{
+            .samplerate = samplerate,
+            .timedata = {},
+            .spectrum = spectrum,
+            .fingerprint = {},
+        };
         const auto expected = openae::features::partial_power(env, input, fmin, fmax);
         // Must differ from the default-parameter result, or dropped parameters go unnoticed.
         REQUIRE(
