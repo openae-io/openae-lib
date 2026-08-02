@@ -59,6 +59,7 @@ jobs:
           -DOPENAE_BUILD_BENCHMARKS=ON
           -DOPENAE_BUILD_TESTS=ON
           -DOPENAE_BUILD_EXAMPLES=ON
+          -DOPENAE_BUILD_VAMP=ON
           -DOPENAE_WARNINGS_AS_ERRORS=ON
           ${{ matrix.config.flags }}
 

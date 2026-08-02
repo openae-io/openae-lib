@@ -36,7 +36,16 @@
                 "OPENAE_WARNINGS_AS_ERRORS": "ON",
                 "OPENAE_BUILD_TESTS": "ON",
                 "OPENAE_BUILD_BENCHMARKS": "ON",
-                "OPENAE_BUILD_PYTHON": "ON"
+                "OPENAE_BUILD_PYTHON": "ON",
+                "OPENAE_BUILD_VAMP": "ON"
+            }
+        },
+        {
+            "name": "vamp",
+            "inherits": ["release"],
+            "installDir": "${sourceDir}/install/${presetName}",
+            "cacheVariables": {
+                "OPENAE_BUILD_VAMP": "ON"
             }
         },
         {

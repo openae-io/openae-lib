@@ -1,0 +1,13 @@
+---
+# Extends the project config. The checks disabled here flag constructs the Vamp C plugin ABI forces on us:
+# - raw new/delete across the interface boundary
+# - reinterpret_cast for the interleaved spectrum buffer
+# - C-style buffer/array indexing behind explicit bounds checks
+# - fixed callback signatures
+InheritParentConfig: true
+Checks: >
+  -bugprone-easily-swappable-parameters,
+  -cppcoreguidelines-owning-memory,
+  -cppcoreguidelines-pro-bounds-constant-array-index,
+  -cppcoreguidelines-pro-bounds-pointer-arithmetic,
+  -cppcoreguidelines-pro-type-reinterpret-cast,
