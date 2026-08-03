@@ -81,6 +81,30 @@ jobs:
           path: openae-vamp-*.zip
           if-no-files-found: error
 
+  summary:
+    name: Package summary
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v6
+        with:
+          pattern: vamp-*
+          path: artifacts/
+          merge-multiple: true
+
+      - name: Write summary table
+        working-directory: artifacts
+        run: |
+          {
+            echo "### Vamp plugin packages"
+            echo ""
+            echo "| File | Size | SHA256 |"
+            echo "| ---- | ---- | ------ |"
+            for f in openae-vamp-*.zip; do
+              echo "| \`$f\` | $(du -h "$f" | cut -f1) | \`$(sha256sum "$f" | cut -d' ' -f1)\` |"
+            done
+          } >> "$GITHUB_STEP_SUMMARY"
+
   release-assets:
     name: Attach release assets
     if: github.event_name == 'release'
