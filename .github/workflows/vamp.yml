@@ -31,6 +31,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0 # tags + history for git describe
 
       - name: Configure CMake
         env:
@@ -64,10 +66,19 @@ jobs:
         if: runner.os == 'macOS'
         run: lipo package/openae.dylib -verify_arch x86_64 arm64
 
+      - name: Create archive
+        # cmake -E tar for a portable zip (no zip command on Windows runners)
+        shell: bash
+        working-directory: package
+        run: |
+          version=$(git describe --tags --always)
+          version="${version#v}"
+          cmake -E tar cf "../openae-vamp-${version}-${{ matrix.config.name }}.zip" --format=zip -- .
+
       - uses: actions/upload-artifact@v6
         with:
           name: vamp-${{ matrix.config.name }}
-          path: package/*
+          path: openae-vamp-*.zip
           if-no-files-found: error
 
   release-assets:
@@ -82,16 +93,9 @@ jobs:
         with:
           pattern: vamp-*
           path: artifacts/
+          merge-multiple: true
 
-      - name: Create archives and upload to release
+      - name: Upload archives to release
         env:
           GH_TOKEN: ${{ github.token }}
-        run: |
-          version="${GITHUB_REF_NAME#v}"
-          cd artifacts
-          for dir in vamp-*/; do
-            platform="${dir#vamp-}"
-            platform="${platform%/}"
-            (cd "$dir" && zip -r "../openae-vamp-${version}-${platform}.zip" .)
-          done
-          gh release upload "$GITHUB_REF_NAME" openae-vamp-*.zip --clobber --repo "$GITHUB_REPOSITORY"
+        run: gh release upload "$GITHUB_REF_NAME" artifacts/openae-vamp-*.zip --clobber --repo "$GITHUB_REPOSITORY"
