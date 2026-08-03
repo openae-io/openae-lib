@@ -1,19 +1,5 @@
 include(FetchContent)
 
-option(CATCH_INSTALL_DOCS "Install documentation alongside library" OFF)
-FetchContent_Declare(
-    Catch2
-    GIT_REPOSITORY    https://github.com/catchorg/Catch2.git
-    GIT_TAG           v3.8.0
-    EXCLUDE_FROM_ALL
-    SYSTEM
-    FIND_PACKAGE_ARGS 3.8.0
-)
-FetchContent_MakeAvailable(Catch2)
-if(TARGET Catch2)
-    set_target_properties(Catch2 Catch2WithMain PROPERTIES CXX_CLANG_TIDY "")
-endif()
-
 FetchContent_Declare(
     tomlplusplus
     GIT_REPOSITORY    https://github.com/marzer/tomlplusplus.git

@@ -1,0 +1,125 @@
+name: Vamp plugin
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - name: linux-x86_64
+            os: ubuntu-24.04
+
+          - name: linux-arm64
+            os: ubuntu-24.04-arm
+
+          - name: macos # universal binary
+            os: macos-15
+            osx_architectures: "x86_64;arm64"
+
+          - name: windows-x64
+            os: windows-2022
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0 # tags + history for git describe
+
+      - name: Configure CMake
+        env:
+          # <memory_resource> requires 14.0: https://developer.apple.com/xcode/cpp/
+          MACOSX_DEPLOYMENT_TARGET: "14.0"
+          CMAKE_OSX_ARCHITECTURES: ${{ matrix.config.osx_architectures }}
+        run: >
+          cmake -S . -B build
+          -DCMAKE_BUILD_TYPE=Release
+          -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded
+          -DBUILD_SHARED_LIBS=OFF
+          -DOPENAE_BUILD_TESTS=ON
+          -DOPENAE_BUILD_VAMP=ON
+
+      - name: Build
+        run: cmake --build build --config Release --parallel
+
+      - name: Run tests
+        run: ctest --test-dir build --build-config Release --output-on-failure
+
+      - name: Package
+        shell: bash
+        run: |
+          cmake --install build --config Release --component vamp --prefix stage
+          mkdir package
+          cp stage/lib*/vamp/* package/
+          cp bindings/vamp/dist/README.md package/
+          cp LICENSE package/
+
+      - name: Verify universal binary
+        if: runner.os == 'macOS'
+        run: lipo package/openae.dylib -verify_arch x86_64 arm64
+
+      - name: Create archive
+        # cmake -E tar for a portable zip (no zip command on Windows runners)
+        shell: bash
+        working-directory: package
+        run: |
+          version=$(git describe --tags --always)
+          version="${version#v}"
+          cmake -E tar cf "../openae-vamp-${version}-${{ matrix.config.name }}.zip" --format=zip -- .
+
+      - uses: actions/upload-artifact@v6
+        with:
+          name: vamp-${{ matrix.config.name }}
+          path: openae-vamp-*.zip
+          if-no-files-found: error
+
+  summary:
+    name: Package summary
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v6
+        with:
+          pattern: vamp-*
+          path: artifacts/
+          merge-multiple: true
+
+      - name: Write summary table
+        working-directory: artifacts
+        run: |
+          {
+            echo "### Vamp plugin packages"
+            echo ""
+            echo "| File | Size | SHA256 |"
+            echo "| ---- | ---- | ------ |"
+            for f in openae-vamp-*.zip; do
+              echo "| \`$f\` | $(du -h "$f" | cut -f1) | \`$(sha256sum "$f" | cut -d' ' -f1)\` |"
+            done
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  release-assets:
+    name: Attach release assets
+    if: github.event_name == 'release'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v6
+        with:
+          pattern: vamp-*
+          path: artifacts/
+          merge-multiple: true
+
+      - name: Upload archives to release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "$GITHUB_REF_NAME" artifacts/openae-vamp-*.zip --clobber --repo "$GITHUB_REPOSITORY"

@@ -36,7 +36,18 @@
                 "OPENAE_WARNINGS_AS_ERRORS": "ON",
                 "OPENAE_BUILD_TESTS": "ON",
                 "OPENAE_BUILD_BENCHMARKS": "ON",
-                "OPENAE_BUILD_PYTHON": "ON"
+                "OPENAE_BUILD_PYTHON": "ON",
+                "OPENAE_BUILD_VAMP": "ON"
+            }
+        },
+        {
+            "name": "vamp",
+            "inherits": ["release"],
+            "installDir": "${sourceDir}/install/${presetName}",
+            "cacheVariables": {
+                "BUILD_SHARED_LIBS": "OFF",
+                "CMAKE_MSVC_RUNTIME_LIBRARY": "MultiThreaded",
+                "OPENAE_BUILD_VAMP": "ON"
             }
         },
         {

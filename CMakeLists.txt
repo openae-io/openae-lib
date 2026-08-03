@@ -58,6 +58,20 @@ else()
     target_compile_options(openae_project_options INTERFACE ${warnings})
 endif()
 
+# dependencies
+include(FetchContent)
+option(XXHASH_BUILD_XXHSUM "Build the xxhsum binary" OFF)
+FetchContent_Declare(
+    xxHash
+    GIT_REPOSITORY    https://github.com/Cyan4973/xxHash.git
+    GIT_TAG           v0.8.3
+    SOURCE_SUBDIR     cmake_unofficial
+    EXCLUDE_FROM_ALL
+    SYSTEM
+    FIND_PACKAGE_ARGS 0.8.3
+)
+FetchContent_MakeAvailable(xxHash)
+
 # library
 add_subdirectory(src)
 
@@ -66,6 +80,19 @@ option(OPENAE_BUILD_TESTS "Build unit tests" OFF)
 if(OPENAE_BUILD_TESTS)
     message(STATUS "Unit tests enabled")
     enable_testing()
+    option(CATCH_INSTALL_DOCS "Install documentation alongside library" OFF)
+    FetchContent_Declare(
+        Catch2
+        GIT_REPOSITORY    https://github.com/catchorg/Catch2.git
+        GIT_TAG           v3.8.0
+        EXCLUDE_FROM_ALL
+        SYSTEM
+        FIND_PACKAGE_ARGS 3.8.0
+    )
+    FetchContent_MakeAvailable(Catch2)
+    if(TARGET Catch2)
+        set_target_properties(Catch2 Catch2WithMain PROPERTIES CXX_CLANG_TIDY "")
+    endif()
     add_subdirectory(tests)
 endif()
 
@@ -82,4 +109,9 @@ include(CMakeDependentOption)
 cmake_dependent_option(OPENAE_BUILD_PYTHON_STUBS "Build Python stubs" ON "OPENAE_BUILD_PYTHON" OFF)
 if(OPENAE_BUILD_PYTHON)
     add_subdirectory(bindings/python)
+endif()
+
+option(OPENAE_BUILD_VAMP "Build Vamp plugin" OFF)
+if(OPENAE_BUILD_VAMP)
+    add_subdirectory(bindings/vamp)
 endif()
