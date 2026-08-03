@@ -16,7 +16,7 @@ target_sources(
 target_link_libraries(
     openae_bindings_python_features
     PRIVATE
-        openae
+        openae::openae
         openae_project_options
 )
 set_target_properties(
