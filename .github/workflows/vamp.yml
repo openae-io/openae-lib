@@ -30,7 +30,7 @@ jobs:
             os: windows-2022
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0 # tags + history for git describe
 
@@ -75,7 +75,7 @@ jobs:
           version="${version#v}"
           cmake -E tar cf "../openae-vamp-${version}-${{ matrix.config.name }}.zip" --format=zip -- .
 
-      - uses: actions/upload-artifact@v6
+      - uses: actions/upload-artifact@v7
         with:
           name: vamp-${{ matrix.config.name }}
           path: openae-vamp-*.zip
@@ -86,7 +86,7 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@v6
+      - uses: actions/download-artifact@v8
         with:
           pattern: vamp-*
           path: artifacts/
@@ -113,7 +113,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/download-artifact@v6
+      - uses: actions/download-artifact@v8
         with:
           pattern: vamp-*
           path: artifacts/
