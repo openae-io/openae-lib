@@ -50,7 +50,7 @@ jobs:
           MACOSX_DEPLOYMENT_TARGET: "14.0"
           CIBW_ARCHS_MACOS: "x86_64 arm64" # https://cibuildwheel.pypa.io/en/stable/faq/#cross-compiling
           CIBW_PLATFORM: ${{ matrix.config.platform }}
-        uses: pypa/cibuildwheel@v4.1.0
+        uses: pypa/cibuildwheel@v4.1.1
       - uses: actions/upload-artifact@v7
         with:
           name: cibw-wheels-${{ matrix.config.os }}-${{ strategy.job-index }}
