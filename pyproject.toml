@@ -41,7 +41,13 @@ keywords = [
 ]
 dependencies = ["numpy>=1.20"]
 
-[project.optional-dependencies]
+[project.urls]
+Homepage = "https://openae.io"
+Source = "https://github.com/openae-io/openae-lib"
+Issues = "https://github.com/openae-io/openae-lib/issues"
+Changelog = "https://github.com/openae-io/openae-lib/blob/main/CHANGELOG.md"
+
+[dependency-groups] # PEP 735, requires pip >= 25.1 or uv
 docs = [
     "sphinx>=8",
     "sphinx-autodoc-typehints",
@@ -61,14 +67,10 @@ tools = [
     "ruff>=0.9",
 ]
 dev = [
-    "openae[docs,tests,tools]", # recursive dependency since pip 21.2
+    { include-group = "docs" },
+    { include-group = "tests" },
+    { include-group = "tools" },
 ]
-
-[project.urls]
-Homepage = "https://openae.io"
-Source = "https://github.com/openae-io/openae-lib"
-Issues = "https://github.com/openae-io/openae-lib/issues"
-Changelog = "https://github.com/openae-io/openae-lib/blob/main/CHANGELOG.md"
 
 [tool.coverage.run]
 branch = true
@@ -141,7 +143,7 @@ skip = [
 ]
 build-verbosity = 1
 test-command = "pytest {project}/bindings/python/tests"
-test-requires = ["pytest", "pytest-benchmark"]
+test-groups = ["tests"]
 # select images with C++ 20 support: https://github.com/pypa/manylinux
 # manylinux_2_28 with GCC 14
 manylinux-x86_64-image = "manylinux_2_28"
