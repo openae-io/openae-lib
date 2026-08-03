@@ -1,4 +1,4 @@
-find_package(Python 3.8 COMPONENTS Interpreter Development.Module REQUIRED)
+find_package(Python 3.9 COMPONENTS Interpreter Development.Module REQUIRED)
 find_package(nanobind REQUIRED)
 
 nanobind_add_module(

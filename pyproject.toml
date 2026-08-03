@@ -1,7 +1,7 @@
 [build-system]
 requires = [
-    "scikit-build-core>=0.10",
-    "nanobind>=2.5",
+    "scikit-build-core>=1.0",
+    "nanobind>=2.13",
     "typing_extensions", # required by nanobind stubgen.py on Python <3.11
 ]
 build-backend = "scikit_build_core.build"
@@ -120,8 +120,9 @@ BUILD_SHARED_LIBS = "OFF"
 OPENAE_BUILD_PYTHON = "ON"
 OPENAE_BUILD_PYTHON_STUBS = "OFF"
 
-[tool.scikit-build.metadata.version]
+[[tool.dynamic-metadata]]
 provider = "scikit_build_core.metadata.regex"
+field = "version"
 input = "CMakeLists.txt"
 regex = '''(?is)^\s*project\s*\(\s*\w+\s*VERSION\s+(?P<value>[\d\.]+)'''
 
