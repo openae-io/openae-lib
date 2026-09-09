@@ -75,7 +75,7 @@ inline constexpr std::array specs{
         .identifier = "peak-amplitude",
         .name = "Peak amplitude",
         .description = "The maximum absolute amplitude of a signal.",
-        .unit = "V",
+        .unit = "",
         .domain = Domain::Time,
         .parameters = {},
         .compute = [](Env& env, Input input, [[maybe_unused]] std::span<const float> parameters) {
@@ -86,7 +86,7 @@ inline constexpr std::array specs{
         .identifier = "energy",
         .name = "Energy",
         .description = "The integral of the signal's squared values over time.",
-        .unit = "V^2s",
+        .unit = "s",
         .domain = Domain::Time,
         .parameters = {},
         .compute = [](Env& env, Input input, [[maybe_unused]] std::span<const float> parameters) {
@@ -97,7 +97,7 @@ inline constexpr std::array specs{
         .identifier = "rms",
         .name = "RMS",
         .description = "A measure for the average energy of a signal.",
-        .unit = "V",
+        .unit = "",
         .domain = Domain::Time,
         .parameters = {},
         .compute = [](Env& env, Input input, [[maybe_unused]] std::span<const float> parameters) {
@@ -439,11 +439,11 @@ constexpr VampPluginDescriptor make_descriptor() {
         }
         // Exceptions must not cross the C ABI into the host.
         try {
-        self->value = self->spec->compute(
-            self->env,
-            in,
-            std::span<const float>(self->parameters.data(), self->spec->parameters.size())
-        );
+            self->value = self->spec->compute(
+                self->env,
+                in,
+                std::span<const float>(self->parameters.data(), self->spec->parameters.size())
+            );
         } catch (...) {
             self->value = std::numeric_limits<float>::quiet_NaN();
         }
