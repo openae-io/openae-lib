@@ -11,7 +11,7 @@ The library is written in C++ and includes bindings for popular programming lang
 
 - [x] C++20
 - [x] Python
-- [ ] Vamp plugin 🚧
+- [x] Vamp plugin
 - [ ] MATLAB 🚧
 - [ ] C 🚧
 - [ ] Web Assembly / Node.js 🚧

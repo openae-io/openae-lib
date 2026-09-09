@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.24)
 
 project(
     openae
-    VERSION 0.1.0
+    VERSION 0.2.0
     DESCRIPTION "OpenAE implementation"
     HOMEPAGE_URL "https://openae.io"
     LANGUAGES CXX
