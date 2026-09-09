@@ -20,10 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Rename the Python distribution to `openae-core` and publish it to PyPI.
   The import name is unchanged: `pip install openae-core`, then `import openae.features`.
 - Make `openae` a PEP 420 namespace package to allow future `openae.*` packages.
-
-### Removed
-
-- Python 3.8 support.
+- Remove Python 3.8 support.
 
 ### Fixed
 
