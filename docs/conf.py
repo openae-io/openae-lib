@@ -22,7 +22,7 @@ subprocess.check_call("doxygen", cwd=HERE)
 project = "openae"
 copyright = f"{datetime.now(tz=timezone.utc).date().year}, OpenAE"
 author = "OpenAE contributors"
-release = metadata.version("openae")
+release = metadata.version("openae-core")
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration

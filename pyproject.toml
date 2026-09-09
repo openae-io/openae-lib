@@ -7,7 +7,7 @@ requires = [
 build-backend = "scikit_build_core.build"
 
 [project]
-name = "openae"
+name = "openae-core"
 dynamic = ["version"]
 description = "Implementation of the OpenAE standards for real-time acoustic emission signal processing"
 authors = [{ name = "Lukas Berbuer", email = "lukas.berbuer@vallen.de" }]

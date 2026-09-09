@@ -4,6 +4,8 @@ on:
   push:
     branches: [main]
   pull_request:
+  release:
+    types: [published]
   workflow_dispatch:
 
 jobs:
@@ -72,13 +74,14 @@ jobs:
 
   publish-to-testpypi:
     name: Publish Python distributions to TestPyPI
+    if: github.event_name == 'push'
     needs:
     - build-wheels
     - build-sdist
     runs-on: ubuntu-latest
     environment:
       name: testpypi
-      url: https://test.pypi.org/p/openae
+      url: https://test.pypi.org/p/openae-core
     permissions:
       id-token: write
     steps:
@@ -95,3 +98,27 @@ jobs:
       with:
         repository-url: https://test.pypi.org/legacy/
         skip-existing: true
+
+  publish-to-pypi:
+    name: Publish Python distributions to PyPI
+    if: github.event_name == 'release'
+    needs:
+    - build-wheels
+    - build-sdist
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/openae-core
+    permissions:
+      id-token: write
+    steps:
+    - name: Download all artifacts
+      uses: actions/download-artifact@v8
+      with:
+        path: dist/
+        pattern: cibw-*
+        merge-multiple: true
+    - name: Remove unsupported Pyodide wheels
+      run: rm -fv dist/*pyodide* || echo "No Pyodide wheels found to remove."
+    - name: Publish to PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
