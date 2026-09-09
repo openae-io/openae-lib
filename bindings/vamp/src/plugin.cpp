@@ -7,6 +7,7 @@
 #include <array>
 #include <complex>
 #include <cstddef>
+#include <limits>
 #include <memory>
 #include <span>
 #include <utility>
@@ -436,11 +437,16 @@ constexpr VampPluginDescriptor make_descriptor() {
                 reinterpret_cast<const std::complex<float>*>(input_buffers[0]), bins
             );
         }
+        // Exceptions must not cross the C ABI into the host.
+        try {
         self->value = self->spec->compute(
             self->env,
             in,
             std::span<const float>(self->parameters.data(), self->spec->parameters.size())
         );
+        } catch (...) {
+            self->value = std::numeric_limits<float>::quiet_NaN();
+        }
         return &self->featureList;
     };
     d.getRemainingFeatures = [](VampPluginHandle) -> VampFeatureList* {
